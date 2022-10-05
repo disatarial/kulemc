@@ -1,0 +1,165 @@
+STARTLOG
+WINAPI: Beep Kernel32.dll
+
+ REQUIRE gpib_port ~disa/gpib.f
+ REQUIRE S+time ~disa/savefile.spf
+
+5000 VALUE time-work \ врем€ воздействи€
+5000 VALUE time-pause \ врем€ между воздействи€ми
+5000 VALUE time-pause-polar \ врем€ между разными пол€рност€ми одого воздействи€
+
+2000 VALUE time-swith  \ врем€ переключени€
+50 VALUE step-front \ кол-во ступенек во вронте
+
+0.95e FVALUE zatuh
+205 VALUE kol-vo
+
+0 VALUE logfile
+ 0 VALUE s
+
+0e FVALUE k+ \ коэфф усилени€  положительной пол€рности 
+0e FVALUE k- \ коэфф усилени€  отрицательной пол€рности
+0e FVALUE izm+ \ измеренна€ амплитуда положительной пол€рности
+0e FVALUE izm- \ отрицательной
+
+
+VARIABLE pribor1
+VARIABLE  speed1
+VARIABLE comport1
+
+ 19200 speed1 !
+
+
+VARIABLE pribor2
+VARIABLE comport2
+VARIABLE  speed2
+
+\ 115200  speed2 !
+
+4.4e FVALUE lev
+0e FVALUE delta
+
+: run1 
+\ com_port @ NewObj pribor1  !
+\ " \\.\COM6"   pribor1  @ ^ open  \ IF ." pribor1 not open " TYPE -1 THROW ELSE ." pribor1 open " TYPE THEN CR
+\ speed1 @ 8 0 0   pribor1   @ ^ set_comm IF  ." set_comm install "   ELSE ." set_comm  error"   THEN CR
+
+ gpib_port NewObj pribor1 !
+ 9 0 pribor1 @ ^  open
+
+\ gpib_port NewObj pribor2 !
+\ 10 0 pribor2 @ ^  open
+\ "  *IDN?" S+CRLF  pribor2 @ ^ write    pribor2 @   ^ read STYPE 
+
+
+" FREQ 1e0"   S+CRLF  pribor1 @ ^ write 100 PAUSE
+" :VOLT 0.01"   S+CRLF  pribor1 @ ^ write 100 PAUSE
+
+" :OUTP:STAT ON"   S+CRLF  pribor1 @ ^ write 100 PAUSE
+
+
+" logmp.txt" outFileCreate TO logfile
+
+
+ kol-vo 0 
+ DO 
+CR I . 
+." ------------0----------- "   DEPTH . FDEPTH . I . CR
+
+I logfile DtoFile
+lev  logfile FtoFile
+
+\ идем вверх
+step-front 0 
+  DO
+       I 1 +  DS>F step-front DS>F F/
+       lev  F*	   " VOLT:OFFS "  TO s  >FNUM s STR+  s  S+CRLF  pribor1 @ ^ write   
+       time-swith step-front / PAUSE
+  LOOP
+time-work PAUSE
+
+\ " :measu:meas1:val?" S+CRLF pribor2 @ ^ write 50 PAUSE pribor2 @ ^  read  S>FLOAT DROP  FDUP FTO izm+ logfile  FtoFile
+\ ." ------------1----------- " DEPTH . FDEPTH .  I . CR
+\ izm+ FABS 0.05e  F< IF 1000 1000 Beep THEN
+
+step-front 0  
+ DO
+      step-front I -  1 -  DS>F step-front DS>F  F/
+ 	lev  F*	   " VOLT:OFFS "  TO s  >FNUM s STR+  s  S+CRLF  pribor1 @ ^ write   
+        time-swith step-front /  PAUSE
+ LOOP
+\ time-work PAUSE
+time-pause-polar PAUSE 
+
+
+
+." ------------2----------- " DEPTH . FDEPTH . I . CR
+step-front 0 
+ DO
+     I 1 +  DS>F step-front DS>F  F/
+     lev -1e F* delta F- F* " VOLT:OFFS " TO s  >FNUM s STR+   s S+CRLF  pribor1 @ ^ write  
+     time-swith step-front / PAUSE
+ LOOP
+." ------------3----------- " DEPTH . FDEPTH .  I . CR
+
+time-work PAUSE
+
+\ I 0 =
+\ IF
+\   lev -1e F* delta F- " VOLT:OFFS " TO s  >FNUM s STR+   s S+CRLF  pribor1 @ ^ write time-work PAUSE  
+\  " :measu:meas1:val?" S+CRLF pribor2 @ ^ write 50 PAUSE pribor2 @ ^  read  S>FLOAT DROP  FTO izm- 
+\  izm+ izm- F+
+ \ izm- lev F/ 
+\  F* -2e F*
+\  FTO delta
+\  time-swith step-front / PAUSE 
+\  lev -1e F* delta F- " VOLT:OFFS " TO s  >FNUM s STR+   s S+CRLF  pribor1 @ ^ write   
+\ ." ++++++++++++++" delta F. ." +++++++++++++" CR
+\ THEN 
+
+\ " :measu:meas1:val?" S+CRLF pribor2 @ ^ write 50 PAUSE pribor2 @ ^  read  S>FLOAT DROP FDUP FTO izm- logfile FtoFile
+\ izm- FABS 0.05e  F< IF 1000 1000 Beep THEN
+
+." ------------4----------- " DEPTH . FDEPTH .  I . CR
+
+
+step-front 0  
+ DO
+      step-front I -  1-  DS>F step-front DS>F F/
+      lev -1e F* delta F- F* " VOLT:OFFS " TO s  >FNUM s STR+   s S+CRLF  pribor1 @ ^ write   
+
+\  0e " VOLT:OFFS " TO s  >FNUM s STR+   s S+CRLF  pribor1 @ ^ write        
+      time-swith step-front / PAUSE
+ LOOP
+ 
+." ------------5-----------" DEPTH . FDEPTH . I . CR
+
+\ 	0e          " VOLT:OFFS " TO s  >FNUM s STR+  s  S+CRLF pribor1 @ ^ write  
+
+ izm+ lev F/ logfile FtoFile
+ izm- lev F/ logfile FtoFile
+
+logfile CRtoFile
+
+	lev zatuh F* FTO lev 
+\  " :measu:meas1:val?" S+CRLF pribor2 @ ^ write 50 PAUSE pribor2 @ ^  read  S>FLOAT DROP  F.
+
+\ 0e F- FDROP 0e FTO delta 
+\ delta F.
+." ------------6-----------" DEPTH . FDEPTH . I . CR
+
+ time-pause PAUSE
+ LOOP
+
+" :OUTP:STAT OFF"   S+CRLF  pribor1 @ ^ write 100 PAUSE
+
+  pribor1  @ ^ close
+  pribor2  @ ^ close
+
+
+;
+
+run1
+
+  
+

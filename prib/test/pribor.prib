@@ -1,0 +1,91 @@
+\ настройки генератора
+
+REQUIRE  HYPE ~disa\~day\hype3\hype3.f
+\ REQUIRE gpib_port ~disa/gpib.f
+\ REQUIRE socket_port ~disa/socket.f
+
+REQUIRE PriborPassport priborpassport.f
+
+CLASS SMB
+\ CELL DEFS clas_generator
+ CELL DEFS pribor
+
+
+: Start 
+|| D:  str_prib   D: etalon  D: flag  D: pribpath  ||
+\ ѕодключаем файл характеристик прибора  
+ S" ./prib/RS_SMB100_108686/haracter.spf"  
+ INCLUDE-PROBE IF ."   ERROR haracteristic pribor not found  " CR -1 flag ! THEN \ считываем характеристики прибора 
+ PriborPassport_info Passport PriborPassport CMOVE \ копируем свежесчитанные данные по прибору 
+ Passport NamePribor 1 +  Passport NamePribor C@  \ название
+ STR>S
+ etalon ! \ копируем эталон дл€ сравнени€
+
+\ подключаем интерфейс и необходимую инициализацию дл€ работы
+  PriborPassport_info interface  DUP 1+ SWAP C@    DUP . 
+
+STR>S >R
+  " .interface" R@ S+ R>     \ " name.interface" 
+  " ./prib/RS_SMB100_108686/" DUP >R      S+ \ " ./prib/JDS6600/name.interface"
+  
+ R@ STR@   ." full name interface: "  2DUP TYPE CR
+  
+  EVALUATE
+  R> STRFREE 
+
+ ." interface: "   PriborPassport_info interface  DUP 1 + SWAP C@	DUP . TYPE CR
+ ." name: "   PriborPassport_info Nameinterface   DUP 1 + SWAP C@		DUP . TYPE CR
+ ." adres: "    PriborPassport_info interface_data1   DUP 1 + SWAP C@	DUP . TYPE CR
+  
+ PriborPassport_info Nameinterface 1+ DUP SWAP C@    EVALUATE   NewObj pribor  !
+ PriborPassport_info interface_data1  1+ DUP SWAP C@ STR>S pribor  @ ^ open 
+ IF \ ошибка
+	-1 flag !
+ ELSE
+	\ PriborPassport_info interface_data2	\ pribor   @ StartInterface 
+\	 115200 8 0 0   pribor   @ ^ set_comm ( BaudRate ByteSize StopBits Parity -- ior ) 
+  THEN 
+ etalon @  STRFREE    
+." testing no execute" CR
+  CR
+  flag @ DUP . CR
+;
+
+
+\ установить частоту
+: SetFreq    >FNUM  " FREQ " DUP >R  STR+  R>  S+CRLF   
+\ DUP STR@ TYPE ."  "
+ pribor   @ ^   write  ; 
+\ установить уровень
+: SetLevel    
+>FNUM  " LEVEL " DUP >R  STR+ R>  S+CRLF 
+\  DUP STR@ TYPE ."  " 
+pribor @ ^ write   
+ " OUTP:STAT ON" S+CRLF pribor @ ^ write 
+; 
+
+
+: AM  ( 1-on, 0- off ) IF " AM: I" ELSE " AM: OF" THEN   S+CRLF  
+\ DUP STR@ TYPE ."  "
+pribor @ ^  write  100 PAUSE ;
+
+: Stop
+" OUTP:STAT OFF" pribor @ ^ write 
+ 100 PAUSE
+ pribor @ ^    close \ закрыли после использовани€
+ pribor @ FreeObj
+;
+
+: PULSE  ( 1-on, 0- off ) IF " SOUR:PULM:STAT ON" ELSE " SOUR:PULM:STAT OFF" THEN   S+CRLF  pribor @ ^  write  100 PAUSE ;
+
+
+ : Off 
+  " OUTP:STAT OFF" S+CRLF  pribor @ ^ write \
+; 
+ : On \ " LEVEL on" S+CRLF  generator @ ^ write  
+ " OUTP:STAT ON" S+CRLF pribor @ ^ write 
+; 
+
+
+
+;CLASS  SMB

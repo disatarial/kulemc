@@ -1,0 +1,4 @@
+ " *pribor*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " C:\progs\SPForth\kulemc\interface\virtual.interface" PriborPassport_info interface	LOAD_TO_BUFER 
+ " 10.10.10.112" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ " 115200" PriborPassport_info interface_data2	LOAD_TO_BUFER 

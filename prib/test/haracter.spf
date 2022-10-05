@@ -1,0 +1,8 @@
+ 1.0000000e00  PriborPassport_info FREQ_MIN			F! 
+ 6.0000000e07  PriborPassport_info FREQ_MAX			F! 
+ 1.4600000e02  PriborPassport_info LEVEL_MAX			F! 
+ " *SMB*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " socket_port" PriborPassport_info interface	LOAD_TO_BUFER 
+ " " PriborPassport_info Nameinterface	LOAD_TO_BUFER 
+ " 10.10.10.27" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ 5025  PriborPassport_info interface_data2		! 

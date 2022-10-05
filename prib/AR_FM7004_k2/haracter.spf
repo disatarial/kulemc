@@ -1,0 +1,9 @@
+ 6.0000000e04  PriborPassport_info FREQ_MIN			F! 
+ 3.0000000e05  PriborPassport_info FREQ_MAX			F! 
+ 0.0000000e00  PriborPassport_info LEVEL_MAX			F! 
+ " *pribor*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " C:\progs\SPForth\emctest\interface\TCPIP.interface" PriborPassport_info interface	LOAD_TO_BUFER 
+ " socket_port" PriborPassport_info Nameinterface	LOAD_TO_BUFER 
+ " 10.10.10.112" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ 5025  PriborPassport_info interface_data2		! 
+ 

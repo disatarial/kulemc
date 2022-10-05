@@ -1,0 +1,15 @@
+COMMENT( )
+ " C:\prog\SP-Forth\emctest\metod\test\default.kal           "   0 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл настроек
+ "  5000 " S>FLOAT DROP F>D DROP  1 SeeOne  2DROP DROP !  \ Пауза между воздействиями, мс
+ "  1000 " S>FLOAT DROP F>D DROP  2 SeeOne  2DROP DROP !  \ Время воздействия ,  мс
+ "  1.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
+ "  5.0000000e07 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
+ "  1.0000000e07 " S>FLOAT DROP  5 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
+ "  0 " S>FLOAT DROP F>D DROP  6 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
+ " C:\prog\SP-Forth\emctest\metod\test\test2.kal    "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ " C:\progs\SPForth\kulemc\prib\default\pribor.prib "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
+ "  5.0000000e06 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
+ "            "   10 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл результата
+ "  23199820 " S>FLOAT DROP F>D DROP  11 SeeOne  2DROP DROP !  \ Объект генератор
+ "  23203932 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ Объект калибровка
+ "  344 " S>FLOAT DROP F>D DROP  13 SeeOne  2DROP DROP !  \ файл результата

@@ -1,0 +1,78 @@
+\ WIN ONLY
+ (
+\ _SYSTEMTIME
+0
+2 -- wYear
+2 -- wMonth
+2 -- wDayOfWeek
+2 -- wDay
+2 -- wHour
+2 -- wMinute
+2 -- wSecond
+2 -- wMilliseconds
+CONSTANT /SYSTEMTIME
+CREATE SYSTEMTIME /SYSTEMTIME ALLOT
+
+WINAPI: GetLocalTime KERNEL32.DLL
+WINAPI: GetTickCount KERNEL32.DLL
+
+: TIME&DATE \  -- sec min hr day mt year  \ 94 FACIL
+  SYSTEMTIME GetLocalTime DROP
+  SYSTEMTIME wSecond W@
+  SYSTEMTIME wMinute W@
+  SYSTEMTIME wHour W@
+  SYSTEMTIME wDay W@
+  SYSTEMTIME wMonth W@
+  SYSTEMTIME wYear W@
+;
+
+: ms@ GetTickCount ;
+)
+ 
+: S+time {  sadr \ --  sadr }
+" _" sadr S+
+wYear >NUM    sadr  STR+ " _" sadr S+
+wMonth >NUM   sadr  STR+ " _" sadr S+
+wDay >NUM      sadr  STR+ " _" sadr S+
+wHour >NUM    sadr  STR+ " _" sadr S+
+wMinute >NUM   sadr  STR+ " _" sadr S+
+wSecond  >NUM  sadr  STR+ 
+sadr  
+;
+	
+
+: StoFile { sadr file \ --  } 
+\  отправляю строку формата ~ас  в файл 
+ ."  " sadr STR@ TYPE ."  "
+sadr STR@ file WRITE-FILE THROW
+sadr STRFREE
+;
+: FtoFile { file } "  " file StoFile  >FNUM   ."  " 2DUP TYPE ."  " file WRITE-FILE  THROW "  " file StoFile  ; \ флоат число в выходной файл
+: DtoFile { file } "  " file StoFile   >NUM   ."  " 2DUP TYPE ."  " file  WRITE-FILE THROW "  " file StoFile  ; \ целое число в выходной файл
+
+
+: outFileCreate { sadr \ --  file } 
+ sadr STR@  ."  outFileCreate= "  TYPE ."  " 
+ sadr STR@ W/O CREATE-FILE-SHARED \ CREATE-FILE 
+ IF   ." file not created" CR  DROP 0 THEN
+  sadr STRFREE
+ ;
+
+: outFileCreateTime { sadr \ --  file } 
+sadr S+time  
+" .txt" sadr S+
+STR@  ."  " 2DUP TYPE ."  " 
+ W/O \ CREATE-FILE 
+ CREATE-FILE-SHARED 
+  IF   ." file not created" CR  DROP 0 THEN \ THROW  
+ sadr STRFREE
+ ;
+ 
+ : CRtoFile " {CRLF}" SWAP StoFile ;
+
+
+: outFileClose  { file \ -- }
+file FLUSH-FILE THROW
+file  CLOSE-FILE THROW
+;
+

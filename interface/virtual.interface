@@ -1,0 +1,5 @@
+REQUIRE virtual_port ~disa/virtualport.f
+ 
+
+" virtual_port" PriborPassport_info Nameinterface 	LOAD_TO_BUFER 
+  

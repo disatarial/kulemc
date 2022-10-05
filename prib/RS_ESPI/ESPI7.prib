@@ -1,0 +1,134 @@
+
+
+\ настройки измерителя
+
+S" INCLUDE ESPI FILE" TYPE CR
+
+REQUIRE  HYPE ~disa\~day\hype3\hype3.f
+\ REQUIRE gpib_port ~disa/gpib.f
+\ REQUIRE socket_port ~disa/socket.f
+REQUIRE PriborPassport priborpassport.f
+
+CLASS  ESPI7
+PriborPassport DEFS  Passport
+
+CELL DEFS pribor 
+
+: Start || D:  str_prib   D: etalon  D: flag  ||
+S" ESPI connecting.." TYPE CR	
+
+  S" .\prib\RS_ESPI/haracter.spf"  
+ INCLUDE-PROBE IF ."   ERROR haracteristic pribor not found  " CR -1 flag ! THEN \ считываем характеристики прибора 
+  PriborPassport_info Passport PriborPassport CMOVE \ копируем свежесчитанные данные по прибору 
+  Passport NamePribor 1 +  Passport NamePribor C@  \ название
+  STR>S
+\  " *pribor*"  
+  etalon !
+."  -2-
+PriborPassport_info interface 1+ DUP SWAP C@    EVALUATE
+."  -3- "
+PriborPassport_info Nameinterface 1+ DUP SWAP C@   2DUP TYPE CR EVALUATE   NewObj pribor !
+."  -4- "
+\ PriborPassport_info interface_data1  1+ DUP SWAP C@ STR>S  
+\ PriborPassport_info interface_data2  @
+22 0 pribor @ ^ open
+." -6-
+ " *IDN?"  S+CRLF  pribor @ ^  write  
+    pribor @ ^ read  str_prib !     
+    
+ \ CR     str_prib @  STR@ TYPE   CR
+."  
+-8- "
+ str_prib @ STR@ etalon @ STR@ WildCMP-U 
+ IF
+ 	 ."   ERROR: ESCI not found. FIND:  "  str_prib @  STR@ TYPE    -1 flag ! 
+ ELSE  
+	"  *IDN?"  S+CRLF pribor @ ^ write    pribor @ ^ read  STYPE CR
+	" INST:SEL SAN" S+CRLF pribor @ ^ write  \ в режим анализатора
+	" :CALC:MARK ON;" S+CRLF pribor @ ^ write     \ установить маркеры
+	\ установить полосу пропускания?
+	\ отключить все факторы?\ "  calc:mark1:max" S+CRLF  pribor @ ^ write 300  PAUSE
+
+	str_prib @ STR@ TYPE 0 flag ! 
+ THEN
+\
+ ."   ESPI connect complite.."
+ 
+ str_prib @ STRFREE 
+ etalon @ STRFREE 
+ flag @ \ DUP . CR
+
+
+;
+
+
+: Stop
+ pribor @ ^    close \ закрыли после использования
+ pribor  @ FreeObj
+;
+
+: SetFreq  
+FDUP  >FNUM " FREQ:cent  " DUP >R  STR+   R> S+CRLF pribor @ ^ write 100 PAUSE     
+   >FNUM  " CALC:MARK1:X " DUP >R  STR+  R> S+CRLF pribor @ ^ write  100 PAUSE     
+\ "  calc:mark1:max" S+CRLF  pribor @ ^ write 300  PAUSE
+;
+
+\ прочитать данные с приемника с текущими настройками
+: GetLevel \ { \ s-adr }  
+|| D: s-adr ||
+300  PAUSE
+BEGIN
+"  calc:mark1:max"  S+CRLF pribor @ ^ write 300  PAUSE
+" calc:mark1:y?"   S+CRLF  pribor @ ^ write 300 PAUSE
+pribor @ ^ read  s-adr !
+s-adr  @ S>FLOAT  
+UNTIL
+1
+\ DEPTH . FDEPTH . 
+;
+
+\ получить значение частоты максимуиа
+: GetFreq  
+|| D: s-adr ||
+ BEGIN
+  "  calc:mark1:max"  S+CRLF pribor @ ^ write 300  PAUSE
+  " calc:mark1:coun ON"   S+CRLF  pribor @ ^ write 100 PAUSE
+  " calc:mark:coun:freq?"   S+CRLF  pribor @ ^ write 100 PAUSE
+  pribor @ ^ read 
+  s-adr !
+  s-adr  @ S>FLOAT  
+ UNTIL
+;
+\ полоса обзора сигналов
+: SetSpan || F: span ||
+span F!    span F@
+>FNUM  " FREQ:SPAN  " DUP >R  STR+  R> S+CRLF pribor @ ^ write  100 PAUSE     
+span F@ 30e F/
+>FNUM  " BAND " DUP >R  STR+  R> S+CRLF pribor @ ^ write  100 PAUSE     
+;
+
+\ измерении глубины модуляции
+: Modulation? || D: s-adr ||
+\ " CALC:MARK:FUNC:MDEP OFF;"  S+CRLF  pribor @ ^ write 1000 PAUSE
+
+" BAND 100" S+CRLF  pribor @ ^ write 300 PAUSE
+" FREQ:SPAN 5 kHz" S+CRLF  pribor @ ^ write 2000 PAUSE
+BEGIN
+	" CALC:MARK:FUNC:MDEP ON;"  S+CRLF  pribor @ ^ write 3000 PAUSE
+	 " CALC:MARK:FUNC:MDEP:RES?"  S+CRLF  pribor @ ^ write 1000 PAUSE
+	pribor @ ^ read  s-adr !
+\ s-adr   @  STR@ TYPE
+	s-adr   @ S>FLOAT  
+UNTIL
+
+;
+\ ИЗМЕРЕНИЕ ЧАСТОТЫ МОДУЛЯЦИИ
+: ModulationFreq? || D: s-adr ||
+  " calc:delt2:x:rel?"   S+CRLF  pribor @ ^ write 100 PAUSE
+pribor @ ^ read S>FLOAT DROP 
+;
+
+: SetData S+CRLF pribor @ ^ write 300  PAUSE ;
+: GetData || D: s-adr || S+CRLF pribor @ ^ write 300  PAUSE  pribor @ ^ read  s-adr ! s-adr  @ S>FLOAT ;
+  
+;CLASS ESPI7

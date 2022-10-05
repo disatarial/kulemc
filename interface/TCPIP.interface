@@ -1,0 +1,5 @@
+REQUIRE socket_port ~disa/socket.f
+ 
+
+" socket_port" PriborPassport_info Nameinterface 	LOAD_TO_BUFER 
+  

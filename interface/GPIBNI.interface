@@ -1,0 +1,3 @@
+REQUIRE gpib_port ~disa/gpib.F
+
+" gpib_port" PriborPassport_info Nameinterface 	LOAD_TO_BUFER 
