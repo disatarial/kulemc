@@ -281,7 +281,6 @@
               <object class="GtkButton" id="buttonSavePribor">
                 <property name="label" translatable="yes">сохранить </property>
                 <property name="visible">True</property>
-                <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
               </object>

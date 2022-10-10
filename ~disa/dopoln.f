@@ -63,7 +63,7 @@ ELSE 0 -> mlen THEN
 
 
 : prob_simv? { \ n --  } 
-  C@ -> n
+  -> n
    n  [CHAR] ; =
    n  [CHAR] , = OR
    n  10 = OR
@@ -79,6 +79,30 @@ bufer  C@   DUP 0 > IF TYPE ELSE 2DROP ."  no info in buffer "  THEN
 ;
 
 
+: NumWordsString  
+{ sstr \ str  slen n  spred   numb } \ определяем количкство слов в строке
+ sstr STR@ -> slen  -> str   \ адр эталона и его длинна
+ slen  0 > 
+IF
+	0 -> spred   \  обниляем предыдущий символ
+	slen  0 
+	DO
+		str I + C@  prob_simv? \ DUP .
+		IF  \  пробел
+		ELSE \ не пробел
+			spred  prob_simv?    			  
+			IF  \ предыдущий символ пробел
+				numb 1 +  -> numb  \ увеличиваем кол-во слов
+			THEN
+		THEN
+		str I + C@ -> spred   \  обниляем предыдущий символ
+	LOOP
+THEN
+sstr STRFREE 
+numb
+;
+
+
  : N_S_PickUpWord {  sstr n \ len_n len_k str slen   len wordnumb_k wordnumb_n -- }  \  выделить одно  N-ное слово из строчки
 sstr STR@ -> slen  -> str   \ адр эталона и его длинна
 0 -> len_n slen  -> len_k 
@@ -86,8 +110,8 @@ slen  0 > IF
 slen  0 DO
 \	ловим начало и конец слов
 \ CR
-	str I + prob_simv?  \ y: -1  n: 0
-	I IF str I + 1 - prob_simv? 0 = AND THEN \ 
+	str I + C@ prob_simv?  \ y: -1  n: 0
+	I IF str I + 1 - C@ prob_simv? 0 = AND THEN \ 
 	IF \ конец
 \		I . str I +  C@ . 
 		I  IF
@@ -96,8 +120,8 @@ slen  0 DO
 		THEN
 	THEN
 	
-	str I + prob_simv? 0=  \ y: -1  n: 0
-	I IF str I + 1 - prob_simv?  AND THEN  \ 
+	str I + C@ prob_simv? 0=  \ y: -1  n: 0
+	I IF str I + 1 - C@ prob_simv?  AND THEN  \ 
 	IF 	\ начало
 \	I . str I +  C@ .
 		n wordnumb_n = IF I -> len_n THEN
@@ -212,7 +236,6 @@ IF
 		IF I -> n  \ ELSE 32 adr I +  ! 
 		THEN
 	LOOP
-	
 ELSE  0 ->  n THEN
 adr n 
 ;
@@ -256,17 +279,25 @@ m1 1-  -> E0
 \  "    |" STYPE n_str STYPE  " |    " STYPE E0 . ."        "
 n_str STR@ -> delta DROP \ количество значащих символов в числе
 \  "    |" STYPE n_str STR@ TYPE  " |    " STYPE E0 . ."        "
-  n_str s>num    0= IF ." <number error_n>"   DROP 0  0 -> flag THEN \  ?SLITERAL1
- DS>F    \  FS. ."   " 
- m2 1+  u <= IF  \ есть что-то после "E"
-  adr m2 +  1 + u m2 - 1 - \ TYPE   SPACE
- str>num   \ 2DUP DROP . 
-  0= IF ." <number error_e>" DROP 0 0 -> flag  THEN
- 10E DS>F F**    F* 
- THEN
-\  10E E0 F**    F* 
-\ E0 . delta . 
- 10E E0 delta  - 1 + DS>F F**    F* 
+  n_str s>num    0= IF ." <number error_n>"   DROP   0 -> flag THEN \  ?SLITERAL1
+ flag
+ IF
+	DS>F    \  FS. ."   " 
+	m2 1+  u <= 
+	IF  \ есть что-то после "E"
+		adr m2 +  1 + u m2 - 1 - \ TYPE   SPACE
+		str>num   \ 2DUP DROP . 
+		\ 0= 
+		IF 
+			10E DS>F F**    F* 
+		ELSE
+			." <number error_e>"  0E \ 0 -> flag  
+		THEN
+	THEN
+	10E E0 delta  - 1 + DS>F F**    F* 
+ELSE
+	0E
+THEN
 str STRFREE
 flag 
 
@@ -322,7 +353,7 @@ REQUIRE TIME&DATE lib/include/facil.f
 
 : IMMEDIATE_EVALUATE EVALUATE ; IMMEDIATE
 
-\EOF
+\ EOF
 
 : IM_ORDER ORDER ; IMMEDIATE
 : IM_WORDS WORDS ; IMMEDIATE
@@ -335,9 +366,9 @@ REQUIRE TIME&DATE lib/include/facil.f
 " 12 " 0 N_S_PickUpWord STR@ str>num . . CR
 
 ;
-: x
-" dths" S>FLOAT  F. . CR
-" фвымфвым " S>FLOAT  F. . CR
+: q1
+ " dths" S>FLOAT  F. . CR
+ " фвымфвым " S>FLOAT  F. . CR
  " 56" S>FLOAT  F. . CR
  " .e" S>FLOAT  F. . CR
  " e" S>FLOAT  F. .  CR
@@ -350,18 +381,20 @@ REQUIRE TIME&DATE lib/include/facil.f
 " 1.23e2" S>FLOAT  F. . CR
 " 123456789123456" S>FLOAT  F. . CR
 
-" .01" S>FLOAT  F. DROP   CR
-" .1" S>FLOAT  F. DROP   CR
-" 1" S>FLOAT  F. DROP   CR
-" 12" S>FLOAT  F. DROP   CR
-" 123" S>FLOAT  F. DROP   CR
-" 1234" S>FLOAT  F. DROP   CR
-" 12345" S>FLOAT  F. DROP   CR
-" 123456" S>FLOAT  F. DROP   CR
-" 1234567" S>FLOAT  F. DROP   CR
-" 12345678" S>FLOAT  F. DROP   CR
-" 123456789" S>FLOAT  F. DROP   CR
-" 1234567890" S>FLOAT  F. DROP   CR
+" .01" S>FLOAT  F. .   CR
+" .1" S>FLOAT  F. .   CR
+" 1" S>FLOAT  F. .   CR
+" 12" S>FLOAT  F. . CR
+" 123" S>FLOAT  F. . CR
+" 1234" S>FLOAT  F. . CR
+" 12345" S>FLOAT  F. . CR
+" 123456" S>FLOAT  F. . CR
+" 1234567" S>FLOAT  F. . CR
+" 12345678" S>FLOAT  F. . CR
+" 123456789" S>FLOAT  F. . CR
+" 1234567890" S>FLOAT  F. . CR
+
+" 123d1" S>FLOAT  F. . CR
 ;
 
 : z
@@ -382,3 +415,7 @@ REQUIRE TIME&DATE lib/include/facil.f
  "  1234  789 " 0 N_S_PickUpWord " |" STYPE  STYPE  " |" STYPE CR
 
   ; 
+: sss  
+" 1234 12345 234 2345"  NumWordsString    .  CR
+" 12345 rgafa 234adsfa 2345"  NumWordsString  .      CR
+; 

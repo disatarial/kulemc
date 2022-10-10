@@ -95,8 +95,7 @@ DUP here CELL +  ! \  -> here
 ;
 
 : Create_sysup-metod-info { \   adr u  here  info }
-HERE  DUP -> here TO sysup-metod-info 
- 
+HERE  DUP -> here TO sysup-metod-info  
 here S" Файл настроек"						4 256		Add_sysup-metod-info TO  vfile_nastr_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Пауза между воздействиями, мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_PAUSE		HERE here :save_next_sysup-metod-info -> here
 here S" Время воздействия ,  мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_TIME		HERE here :save_next_sysup-metod-info -> here
@@ -104,14 +103,14 @@ here S" Частота начальная, Гц"					2 1 FLOATS	Add_sysup-metod-
 here S" Частота конечная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_END		HERE here :save_next_sysup-metod-info -> here
 here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_STEP		HERE here :save_next_sysup-metod-info -> here
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
-here S" Файл калибровки"					4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл калибровки"						4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
 \ here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
-here S" Файл генератора"					5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл генератора"						5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
-here S" Файл результата"					3 256		Add_sysup-metod-info TO  vfile_result		HERE here :save_next_sysup-metod-info -> here
+here S" Файл результата"						3 256		Add_sysup-metod-info TO  vfile_result		HERE here :save_next_sysup-metod-info -> here
 here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
 here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
-here S" файл результата"					1 1 CELLS	Add_sysup-metod-info TO vresult		\ HERE here :save_next_sysup-metod-info -> here 
+here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\ HERE here :save_next_sysup-metod-info -> here 
 
 ;
 
@@ -270,39 +269,38 @@ BEGIN
 	 -> adr -> NumFlag -> numadr
 	NumFlag 1 =  \ целое
 		IF  
-			"  {''} " save_file  StoFile  
-			numadr @  save_file DtoFile 
-			" {''} S>FLOAT DROP F>D DROP " save_file StoFile
-			i save_file DtoFile 
-			" SeeOne  2DROP DROP ! " save_file StoFile
+			"  {''} " save_file  StoFile					\ - 
+			numadr @  save_file DtoFile					\ 1
+			" {''} S>FLOAT DROP F>D DROP " save_file StoFile		\ 2
+ 			i save_file DtoFile						\ -
+			" SeeOne  2DROP DROP ! " save_file StoFile			\ 3
 			"  \ " save_file  StoFile  
-			adr u  STR>S save_file  StoFile  
-			save_file CRtoFile 
+			adr u  STR>S save_file  StoFile					\ -
+			save_file CRtoFile						\ -
 		THEN
 	NumFlag 2 =  \ действительное
 		IF  
-			"  {''} " save_file  StoFile  
-			numadr F@  save_file FtoFile 
-			" {''} S>FLOAT DROP " save_file StoFile
-			i save_file DtoFile 
-			" SeeOne  2DROP DROP F! " save_file StoFile
-			"  \ " save_file  StoFile  
-			adr u  STR>S save_file  StoFile  
-			save_file CRtoFile 
+			"  {''} " save_file  StoFile					\ -
+			numadr F@  save_file FtoFile					\ 1
+			" {''} S>FLOAT DROP " save_file StoFile				\ 2
+			i save_file DtoFile						\ -
+			" SeeOne  2DROP DROP F! " save_file StoFile			\ 3
+			"  \ " save_file  StoFile		
+			adr u  STR>S save_file  StoFile					\ -
+			save_file CRtoFile						\ -
 		THEN
 	NumFlag 2 >  NumFlag  6 <   AND  \ строка
 		IF  
-			"  {''} " save_file  StoFile  
+			"  {''} " save_file  StoFile					\ -
+			numadr  1 + numadr C@   STR>S  save_file StoFile \ строка	\ 1
+			"  {''}  " save_file  StoFile					\ 2
 
-			numadr  1 + numadr C@   STR>S  save_file StoFile \ строка
-			"  {''}  " save_file  StoFile  
-
-			i save_file DtoFile 
-			" SeeOne  2DROP DROP  LOAD_TO_BUFER " save_file StoFile
+			i save_file DtoFile						\ -
+			" SeeOne  2DROP DROP  LOAD_TO_BUFER " save_file StoFile		\ 3
 
 			"  \ " save_file  StoFile  
-			adr u  STR>S save_file  StoFile  
-			save_file CRtoFile 
+			adr u  STR>S save_file  StoFile					\ -
+			save_file CRtoFile						\ -
 		THEN
 
 
@@ -357,9 +355,11 @@ UNTIL
 	tabl_kalibr NewObj vkalibrovka @  !
 	."  include kalibrovka  " CR	   
 
-	vkalibrovka  @ @ 	vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
-		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
-		ELSE ."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  THEN CR
+vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S 5 vkalibrovka  @ @ ^ LoadFile	\ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
+
+
+\		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
+\		ELSE ."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  THEN CR
 
 	\ результаты	подготовили файл
 	" .\result\result.txt"   outFileCreate vresult @ !

@@ -39,6 +39,14 @@ CELL DEFS  datas \ ссылка на данные
 CELL DEFS num_datas  \ количество загруженных €чеек
 CELL DEFS max_datas  \ всего €чеек
 CELL DEFS num_datas_in_string   \ количество данных в  строке
+
+
+init:
+	 SELF TO tekdata 
+	1 num_datas_in_string ! 
+	0  num_datas ! \ :SetData  
+	20  ALLOCATE THROW   datas !
+;
  
 : deltaFreq ( freq1 freq2 - flag) \ сравнение 2х  чисел c дельной аналог F= с учетом погрешностей ѕ 
 ||   F: freq   ||
@@ -62,15 +70,18 @@ freq F@ F/
 
 
 
-: adr_data_in_number    
+: adr_data_in_number    \ получить адрес строки по еЄ номеру
 	|| D:  N_write ||
+ 
 	N_write ! 
 \ ." ->" DUP .  N_write @ . ." <-"
 	num_datas_in_string @ FLOATS  * datas @ +  N_write @ FLOATS +   
+ 
 ;
  
 
-: take_freq_in_number \ матрица  частот и антенных факторов
+: take_freq_in_number \  получить частоту по еЄ номеру ( первы столбец)
+\ матрица  частот и антенных факторов
 	\   num_datas_in_string  @ FLOATS * datas @ + SF@
  \ ." ->" DUP . 
  	0  adr_data_in_number  F@  
@@ -181,15 +192,24 @@ freq F@ F/
 	\ num_datas @  . num_datas_in_string @  . CR
 	CR
 	num_datas @ 
-	0 
-	DO
-		I take_freq_in_number F.
-		num_datas_in_string @ 1 
+	DUP 1 > 
+	IF
+		0 
 		DO
-			J I take_data_in_number F. 
-		LOOP
-		CR
-	LOOP 
+			I take_freq_in_number F.
+			num_datas_in_string @  
+			DUP 1 >
+			IF
+				1 
+				DO
+					J I take_data_in_number F. 
+				LOOP
+				CR
+			THEN
+		LOOP 
+	ELSE
+		." num_datas = 0 " CR 
+	THEN
 ;
 
 
@@ -209,6 +229,8 @@ freq F@ F/
 
 : dispose 
 	datas @ FREE THROW  
+	0 num_datas !
+	
 ;
 
 : SaveData  \ s-filename
@@ -235,70 +257,105 @@ freq F@ F/
 	file @ outFileClose 
 ;
 
- 
-: LoadFile  (  name  col   -- )
-|| D: name   D: str  D: file  D: len    D: col ||
-  col ! name ! 
+ : SaveFile  \  сохранить табличку в файл  
+ \ s-filename
+|| D: file ||
+
+	outFileCreate file !
+	CR
+	num_datas @ 
+	0 
+	DO
+		I take_freq_in_number  FDUP  file @ FtoFile    F.
+		num_datas_in_string @ 1 
+		DO
+			J I take_data_in_number  FDUP file @ FtoFile  F.
+		LOOP
+	file @ CRtoFile 
+	\		CR
+	LOOP 
+	file @ outFileClose 
+;
+
+: LoadFile  (  name     -- ) \ загрузить табличку из файла "name"  с кличеством колонок "col"
+|| D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow ||
+ \  col !
+  name ! 
+  \ dispose
+ 0 numrow !
    1024 ALLOCATE  THROW  str !
 
-\ + 1. считаем кол-во данных в файле  зна€ кол-во столбцов ( num_datas_in_string) ( NextWord)
+\ + 1. считаем кол-во данных в файле  зна€ кол-во столбцов   num_datas_in_string    NextWord 
 \ 2. выдел€ем соостественно пам€ти
 \ 3. читаем поочереди цифры, и пишем их по пор€дку в табличку.
- name @ STR@ R/O   OPEN-FILE   IF ." file not open"
+ name @ STR@ R/O   OPEN-FILE   
+	  IF ." file not open"
+	 DROP
 	  ELSE
 	   file ! 
 	  0 num_datas ! 
-BEGIN	   
-	 str @ 1023    file @ READ-LINE ( c-addr u1 fileid -- u2 flag ior )
+ BEGIN	   
+	str @ 1023    file @ READ-LINE  
 	THROW DROP len !
+	  numrow  @ 0 = IF str @ len @ STR>S NumWordsString  numrow ! THEN
+ 
 \	str @ len @ TYPE  CR
 	num_datas @ 1 + num_datas ! 
 len @ 0 = 
 UNTIL
 	num_datas @ 1 - num_datas ! 
+\ в последней строке считаем  кол-во слов
+
+\ ." num=" numrow @ . 
+\	str @  
+\ STR>S NumWordsString 
+\ 5 
+numrow @  col !
+
 
  file @ CLOSE-FILE THROW
 THEN 
-CR name @ STR@ TYPE ."   " num_datas @ .  CR
+CR name @ STR@ TYPE ." num_datas  " num_datas @ .  CR
+
+
 
 
 SELF TO tekdata 
 col @ 	 num_datas_in_string !   \ :SetData  
-num_datas @	DUP .  col @  DUP .  * FLOATS   CELL +  DUP .   ALLOCATE THROW   datas !
+num_datas @ col @   * FLOATS   CELL +     ALLOCATE THROW   datas !
 
-
-num_datas @ 1 > 
+num_datas @ 0 > 
 IF
    name @ STR@ R/O   OPEN-FILE   
-   IF ." file not open"
+   IF ." file not open" DROP
    ELSE  
     file ! 
+
 	num_datas @ 0  
 	DO	
-		 str @ 1023    file @ READ-LINE ( c-addr u1 fileid -- u2 flag ior )
+	0 Icorrect ! 
+		 str @ 1023    file @ READ-LINE  
 		THROW DROP len !
 		\ I . str @ len @ TYPE  CR
 		num_datas_in_string @ 0
-		DO 
+		DO  I   Icorrect @  - .
 		   str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
-		   S>FLOAT 
-		   IF  
-		     J I  adr_data_in_number F!
+		   S>FLOAT  0 =
+		   J I Icorrect @ -  adr_data_in_number F!		     
+		   IF
+			Icorrect @ 1 + Icorrect !
 		   THEN
+		   
 		LOOP 
 		CR
 	LOOP
      file @ CLOSE-FILE THROW
-   THEN
+    THEN   
 ELSE
-		num_datas_in_string @ 0
-		DO 
-		     0e 1 I  adr_data_in_number F!
-		     0e 2 I  adr_data_in_number F!
-		LOOP 
-
+		     0e 0 0  adr_data_in_number F!
 THEN
- str @ FREE
+
+ str @ FREE  DROP
 ;
 
 
@@ -312,11 +369,11 @@ THEN
 
 
 
- 
+ \EOF
 
  tabl_kalibr NEW kalibrovka 
 
-   " ~disa/1.kal" 5 kalibrovka  LoadFile
+   " ~disa/1.kal"   kalibrovka  LoadFile
    CR CR
 kalibrovka SeeDatas
 

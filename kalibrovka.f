@@ -114,6 +114,8 @@ VARIABLE button_refr
  ;
   
  : Refresh_param_kal_list 
+ kalibrovka @ ^  num_datas @  0 >
+IF
 	liststore_param_kal  @ 1 gtk_list_store_clear	 DROP
 	kalibrovka @ ^  num_datas @  
 	0 
@@ -144,6 +146,7 @@ VARIABLE button_refr
 	CR
 	LOOP  
 \ kalibrovka @ ^ datas @  DUP . F@ F. 
+THEN
 ; 
 
 
@@ -158,7 +161,7 @@ VARIABLE button_refr
 	0 ;  1 CELLS  CALLBACK: buttonClosePribor_click 
 
 
-: LoadKalFile {   \ s s2  flag file  }
+: LoadKalFile3 {   \ s s2  flag file  }
 	"" -> s
 	-1 -> flag
 	." DEPTH =" .S   ."  filechooserbutton_pribor_open  "  
@@ -175,27 +178,23 @@ VARIABLE button_refr
 		\ грузим файл калибровки
 		s STRFREE
 		file ASCIIZ> STR>S   -> s  DEPTH . 
-	\	s STR@  R/O OPEN-FILE   THROW  -> file  \ OPEN-FILE ( c-addr u fam -- fileid ior ) \ 94 FILE
-	\	s kalibrovka @ ^  SaveData \  LoadFile
-		
-\		s STR@   ." INCLUDE FILE: " TYPE   CR
-\		s STR@ KalFeleName SWAP 1 + CMOVE 
-\		\ CR .S CR
-\		  kalibrovka @ s STR@   INCLUDE-PROBE   -> file  \  ERR-INCLUDE-PROBE
-\		\ CR .S CR
-\		file 
-\		IF 
-\			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-\		ELSE     
-\			."  kalibrovka:  "  kalibrovka @    SeeDatas  
-\		THEN 
-\		CR	
+		s STR@   ." INCLUDE FILE: " TYPE   CR
+		s STR@ KalFeleName SWAP 1 + CMOVE 
+		\ CR .S CR
+		  kalibrovka @ s STR@   INCLUDE-PROBE   -> file  \  ERR-INCLUDE-PROBE
+		\ CR .S CR
+		file 
+		IF 
+			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
+		ELSE     
+			."  kalibrovka:  "  kalibrovka @    SeeDatas  
+		THEN 
+		CR	
 	\	INCLUDE-PROBE   .S  -> file
-	THEN
-
-	
 ;
-: LoadKalFile2 {   \ s s2  flag file  }
+
+: LoadKalFile {   \ s s2  flag file  }
+
 	"" -> s
 	-1 -> flag
 	." DEPTH =" .S   ."  filechooserbutton_pribor_open  "  
