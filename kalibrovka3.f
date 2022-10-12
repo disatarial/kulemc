@@ -12,6 +12,9 @@ STARTLOG
  REQUIRE  STR@ ~ac\str5.f                    \ работа с динамическими строками
  REQUIRE  F. ~disa\dopoln.f
 
+
+
+
  0 , HERE 256 ALLOT  VALUE ERROR_PROG_BUFER \ буфер ошибок
 
 VARIABLE  ERROR_PROG 
@@ -47,7 +50,7 @@ VARIABLE num_data \ номер последних/текущих данных в списке  gtk_tree... только 
 VARIABLE num  \ номер выделенной строки
 0 , HERE  512 ALLOT  VALUE KalFeleName
  
- 
+
 \ оболочка для пользователя
 VARIABLE pargv
 VARIABLE pargs
@@ -97,9 +100,10 @@ VARIABLE button_refr
   0 , HERE  64 ALLOT  VALUE iter_store_pribor
   0 , HERE  64 ALLOT  VALUE iter_store_text 
 
+
  : ->degree  
  || D: adr D: u ||
- ." degree " 
+  ." degree " 
  \ freq, decimal -- freq2** 
  entry_degree   @ 1 gtk_entry_get_text_length     DUP 0 > 
 	IF 
@@ -159,8 +163,7 @@ THEN
 :NONAME  
 	win_pribor @ 1 gtk_widget_destroy DROP    
 	0 ;  1 CELLS  CALLBACK: buttonClosePribor_click 
-
-
+ 
 
 : LoadKalFile {   \ s s2  flag file  }
 
@@ -179,19 +182,20 @@ THEN
 	IF   
 		\ грузим файл калибровки
 		s STRFREE
-		file ASCIIZ> STR>S   -> s  DEPTH . 
+		file ASCIIZ> STR>S   -> s \  DEPTH . 
 		s STR@   ." INCLUDE FILE: " TYPE   CR
 		s STR@ KalFeleName SWAP 1 + CMOVE 
 		\ CR .S CR
-		  kalibrovka @ s STR@   INCLUDE-PROBE   -> file  \  ERR-INCLUDE-PROBE
+\		  kalibrovka @ s STR@   INCLUDE-PROBE   -> file  \  ERR-INCLUDE-PROBE
+		  s kalibrovka @ :LoadFile   
 		\ CR .S CR
-		file 
-		IF 
-			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-		ELSE     
+\		file 
+\		IF 
+\			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
+\		ELSE     
 			."  kalibrovka:  "  kalibrovka @    SeeDatas  
-		THEN 
-		CR	
+\		THEN 
+\		CR	
 	\	INCLUDE-PROBE   .S  -> file
 	THEN
 
@@ -202,7 +206,7 @@ THEN
 || D: file D: dir ||
 	CR ." end- "   .S CR 
 	LoadKalFile 
-	Refresh_param_kal_list
+\	Refresh_param_kal_list
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_current_folder    dir !
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_filename    file !
 
@@ -212,18 +216,18 @@ THEN
 \	 file	@ 	filechooserbutton_kal  @  gtk_file_chooser_get_filename    
 
 	CR ." end "   .S CR 
-	kalibrovka @    ^ dispose
+\	kalibrovka @    ^ dispose
  	window @   ;  1 CELLS  
 CALLBACK: filechooserbutton_kal_open  
 
- :NONAME
+( :NONAME
 || D: column D: path D: tree_view  D: model   ||
 tree_view  ! path !  column !
 	." TreeView_start_metod_click"  CR
 	dialog @  1 gtk_widget_show DROP	
 	\ выделенная строчка 
 	tree_view  @ 1 gtk_tree_view_get_model    model ! 
-	path @ iter_store_text model @ 3   gtk_tree_model_get_iter DROP \ (model, &iter, path_string)
+	path @ iter_store_text model @ 3   gtk_tree_model_get_iter DROP \ (model, &iter, path_string 
 	iter_store_text model @ 2 gtk_tree_model_get_string_from_iter    ASCIIZ> STR>S    \ STYPE ."  "
 	S>FLOAT 
 	IF
@@ -245,6 +249,7 @@ tree_view  ! path !  column !
 	THEN
 	column  @ path @ tree_view @	window @   ;  3 CELLS  
 CALLBACK:  treeview_param_prib_click 
+	 )
 	 
 \ :NONAME   
 \ 	window @  ;  1 CELLS  
@@ -252,20 +257,23 @@ CALLBACK:  treeview_param_prib_click
  
 : LoadKalibrovka
 	|| D: flag ||
-	kalibrovka @ KalFeleName ASCIIZ>  INCLUDE-PROBE     0 =  flag !	
-	flag @
-	IF 
-		."  kalibrovka:  "  kalibrovka @    SeeDatas  
-	ELSE     
-		"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-	THEN 
-	flag @
+	\ kalibrovka @ KalFeleName   ASCIIZ>  INCLUDE-PROBE     0 =  
+	-1 flag !	
+	 KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ LoadFile   \ ASCIIZ>  INCLUDE-PROBE     0 =  flag !	
+\	flag @
+\	IF 
+\		."  kalibrovka:  "  kalibrovka @    SeeDatas  
+\	ELSE     
+\		"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
+\	THEN 
+\	-1 flag @
 ; 
  
 :NONAME    \ { \ flag adr u   }
 || D: flag  D: adr  D: u  F: data ||
 	-1  flag !
-	LoadKalibrovka flag !
+\	LoadKalibrovka flag !
+LoadKalFile
 	dialog_entry_freq  @ 1 gtk_entry_get_text_length   DUP 0 > 
 	flag @ AND
 	IF 
@@ -342,11 +350,11 @@ CALLBACK:  treeview_param_prib_click
 	IF 
 		."  dialog -norma " CR 
 		 \ " 1.txt"
-		  KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveData
+		  KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveFile \ SaveData
 	THEN	
 \ .S	
 	kalibrovka @    SeeDatas 
-	kalibrovka @    ^ dispose
+\	kalibrovka @    ^ dispose
 	dialog @  1 gtk_widget_hide DROP 
 	filechooserbutton_kal_open
 	dialog   @ ;  1 CELLS  
@@ -423,7 +431,9 @@ CALLBACK: button_cancel_click
  
 :NONAME 
 	|| D: flag ||  
-	LoadKalibrovka flag !
+\	LoadKalibrovka 
+-1 flag !
+LoadKalFile
 	kalibrovka @    ^ num_datas @ 1 +	kalibrovka @    ^ num_datas !
 	kalibrovka @    ^ num_datas @  2 - 0 kalibrovka @    ^  adr_data_in_number F@   
 	kalibrovka @    ^ num_datas @  1 - 0 kalibrovka @    ^  adr_data_in_number F!   
@@ -434,23 +444,25 @@ CALLBACK: button_cancel_click
 	kalibrovka @    ^ num_datas @  2 - 2 kalibrovka @    ^  adr_data_in_number F@   
 	kalibrovka @    ^ num_datas @  1 - 2 kalibrovka @    ^  adr_data_in_number F!   
 
-	KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveData
+	KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveFile \ SaveData
 	kalibrovka @    SeeDatas 	
-	kalibrovka @    ^ dispose	
+\	kalibrovka @    ^ dispose	
 	filechooserbutton_kal_open
 	window @  ;  1 CELLS  
 CALLBACK: buttonAdd_click 
 
 :NONAME  
 	|| D: flag ||  
-	LoadKalibrovka flag !
+\	LoadKalibrovka
+-1  flag !
+LoadKalFile
 	kalibrovka @    ^ num_datas @ 2 >
 	IF
 		kalibrovka @    ^ num_datas @ 1 -	kalibrovka @    ^ num_datas !
 	THEN
-	KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveData
+	KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveFile \ SaveData
 	kalibrovka @    SeeDatas 	
-	kalibrovka @    ^ dispose	
+\	kalibrovka @    ^ dispose	
 	filechooserbutton_kal_open
 	window @  ;  1 CELLS  
 CALLBACK: buttonDel_click 
@@ -500,9 +512,9 @@ createtablkalibr
  
 
 	  \ готовим окошко под параметры оборудования
-	    " treeview_param_prib"  >R R@ STR@ DROP builder_pribor    @ 2 gtk_builder_get_object treeview_param_kal ! R> STRFREE
-	    " liststore_param_kal" >R R@ STR@ DROP builder_pribor   @ 2 gtk_builder_get_object liststore_param_kal ! R> STRFREE  
-	    " row-activated"    >R 0 0 0  ['] treeview_param_prib_click R@ STR@ DROP treeview_param_kal @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+\	    " treeview_param_prib"  >R R@ STR@ DROP builder_pribor    @ 2 gtk_builder_get_object treeview_param_kal ! R> STRFREE
+\	    " liststore_param_kal" >R R@ STR@ DROP builder_pribor   @ 2 gtk_builder_get_object liststore_param_kal ! R> STRFREE  
+\	    " row-activated"    >R 0 0 0  ['] treeview_param_prib_click R@ STR@ DROP treeview_param_kal @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 
 	 " buttonAdd" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonAdd  !    R> STRFREE \ 2DROP
 	  " clicked"  >R 0 0 0  ['] buttonAdd_click R@ STR@ DROP buttonAdd @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
@@ -553,7 +565,7 @@ createtablkalibr
 : start
 STARTLOG
 	 ['] Startpribor TASK TO runthread
-	  runthread START
+	  runthread START  
 ; 
 
  
@@ -564,20 +576,10 @@ STARTLOG
 \ )
    start
 
-: ssf { \ save_file s -- }
-	S" tst.txt" W/O CREATE-FILE-SHARED IF   ." file not created" CR  DROP 0 THEN
 
-\	s outFileCreate 
-->  save_file
-\	s STRFREE
-\	save_file  Save_PriborPassport
-\	save_file  SaveInterface
-	save_file outFileClose
-;
-
-    FALSE TO ?GUI
+\    FALSE TO ?GUI
   \   ' CECONSOLE MAINX !
-	 ' start MAINX !
-         S" kalfile.exe"  SAVE
+\	 ' start MAINX !
+ \        S" kalfile.exe"  SAVE
 \	BYE
 

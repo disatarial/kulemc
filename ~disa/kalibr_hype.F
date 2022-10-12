@@ -45,7 +45,7 @@ init:
 	 SELF TO tekdata 
 	1 num_datas_in_string ! 
 	0  num_datas ! \ :SetData  
-	20  ALLOCATE THROW   datas !
+	1 FLOATS   ALLOCATE THROW   datas !
 ;
  
 : deltaFreq ( freq1 freq2 - flag) \ сравнение 2х  чисел c дельной аналог F= с учетом погрешностей ПК
@@ -72,8 +72,10 @@ freq F@ F/
 
 : adr_data_in_number    \ получить адрес строки по её номеру
 	|| D:  N_write ||
- 
-	N_write ! 
+	
+DUP max_datas @ > IF DROP max_datas @ THEN	
+DUP 1 < IF DROP 0 THEN	
+N_write ! 	 
 \ ." ->" DUP .  N_write @ . ." <-"
 	num_datas_in_string @ FLOATS  * datas @ +  N_write @ FLOATS +   
  
@@ -141,7 +143,7 @@ freq F@ F/
 ;
 
  : PredFreq ( freq_old -- freq_new ) \ перебор вниз!
-	FreqNum       1 - take_freq_in_number      CR
+	FreqNum       1 - take_freq_in_number    \  CR
  ;
 
 : TakeData \ ( freq  num  -- data )
@@ -196,7 +198,7 @@ freq F@ F/
 	IF
 		0 
 		DO
-			I take_freq_in_number F.
+\			I take_freq_in_number F.
 			num_datas_in_string @  
 			DUP 1 >
 			IF
@@ -246,7 +248,8 @@ freq F@ F/
 	0 
 	DO
 		" LoadData:  "	file @ StoFile 
-		I take_freq_in_number  FDUP  file @ FtoFile    F.
+		I take_freq_in_number  \ FDUP
+		  file @ FtoFile \   F.
 		num_datas_in_string @ 1 
 		DO
 			J I take_data_in_number  FDUP file @ FtoFile  F.
@@ -260,13 +263,14 @@ freq F@ F/
  : SaveFile  \  сохранить табличку в файл  
  \ s-filename
 || D: file ||
-
+." SaveFile... "
 	outFileCreate file !
 	CR
 	num_datas @ 
 	0 
 	DO
-		I take_freq_in_number  FDUP  file @ FtoFile    F.
+		I take_freq_in_number   \ FDUP  
+		file @ FtoFile   \  F.
 		num_datas_in_string @ 1 
 		DO
 			J I take_data_in_number  FDUP file @ FtoFile  F.
@@ -275,13 +279,14 @@ freq F@ F/
 	\		CR
 	LOOP 
 	file @ outFileClose 
+." ... SaveFile "
 ;
+: SaveFile DROP CR ." SaveFile" CR ;
 
 : LoadFile  (  name     -- ) \ загрузить табличку из файла "name"  с кличеством колонок "col"
 || D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow ||
  \  col !
   name ! 
-  \ dispose
  0 numrow !
    1024 ALLOCATE  THROW  str !
 
@@ -297,7 +302,7 @@ freq F@ F/
  BEGIN	   
 	str @ 1023    file @ READ-LINE  
 	THROW DROP len !
-	  numrow  @ 0 = IF str @ len @ STR>S NumWordsString  numrow ! THEN
+	numrow  @ 0 = IF str @ len @ STR>S NumWordsString  numrow ! THEN
  
 \	str @ len @ TYPE  CR
 	num_datas @ 1 + num_datas ! 
@@ -310,18 +315,18 @@ UNTIL
 \	str @  
 \ STR>S NumWordsString 
 \ 5 
-numrow @  col !
+numrow @  1 +  DUP max_datas ! col !
 
 
  file @ CLOSE-FILE THROW
 THEN 
-CR name @ STR@ TYPE ." num_datas  " num_datas @ .  CR
-
-
-
+CR name @ STR@ TYPE ."  num_datas = " num_datas @ .  ." numrow = " numrow @  . CR
 
 SELF TO tekdata 
 col @ 	 num_datas_in_string !   \ :SetData  
+
+ \  datas @ dispose
+   
 num_datas @ col @   * FLOATS   CELL +     ALLOCATE THROW   datas !
 
 num_datas @ 0 > 
@@ -338,7 +343,7 @@ IF
 		THROW DROP len !
 		\ I . str @ len @ TYPE  CR
 		num_datas_in_string @ 0
-		DO  I   Icorrect @  - .
+		DO  I   Icorrect @  - \ .
 		   str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
 		   S>FLOAT  0 =
 		   J I Icorrect @ -  adr_data_in_number F!		     
@@ -347,7 +352,7 @@ IF
 		   THEN
 		   
 		LOOP 
-		CR
+		\ CR
 	LOOP
      file @ CLOSE-FILE THROW
     THEN   
@@ -366,7 +371,7 @@ THEN
 : LoadData tekdata  ^ LoadData ;  ( data1 .. dataN -- )
 : LoadData: tekdata  ^ LoadData: ;   ( data1 .. dataN -- )
 : SeeDatas   ^ SeeDatas ;
-
+: :LoadFile ^ LoadFile ;
 
 
  \EOF

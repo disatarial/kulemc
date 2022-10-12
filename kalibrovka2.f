@@ -15,6 +15,27 @@ STARTLOG
  
  0 , HERE 256 ALLOT  VALUE ERROR_PROG_BUFER \ буфер ошибок
 
+ 0 VALUE FlagConnectData 
+ 10 VALUE MaxConnectData 
+ 0 , HERE MaxConnectData FLOATS  ALLOT  VALUE ConnectData  \  перенос данных между потоками
+
+: InConnectData
+ConnectData 1 -  @  MaxConnectData <
+IF
+ ConnectData  ConnectData 1 -  @ + F!
+ ConnectData 1 -  @ 1 + ConnectData 1 -  @
+THEN 
+;
+: NConnectData ConnectData 1 -  @ ;
+: OutConnectData 
+ConnectData 1 -  @  0 >
+IF
+ ConnectData  ConnectData 1 -  @ + F@
+ ConnectData 1 -  @ 1 - ConnectData 1 -  @
+THEN
+;
+
+
 VARIABLE  ERROR_PROG 
 
 : LOAD_TO_ERR_BUFER { s-adr adr \ u    -- }
@@ -112,35 +133,28 @@ IF
 	kalibrovka  num_datas @  
 	0 
 	DO
-		I kalibrovka   take_freq_in_number \ F.
+\		I kalibrovka   take_freq_in_number  F.
 		I iter_store_pribor  liststore_param_kal  @  3 gtk_list_store_insert DROP   			
 		 -1 I 0 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 
-	\	kalibrovka @  ^ num_datas_in_string @ 
-	\	0 
-	\	DO	
-		I 0  kalibrovka    take_data_in_number \ FDUP F.   \ F>D frequency
-
-
-		-1   >FNUM   STR>S  >R R@ STR@ DROP  1  iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
-		I 1  kalibrovka    take_data_in_number \ FDUP F.  \ F>D
-		-1   >FNUM STR>S  >R R@ STR@ DROP 2 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
-		kalibrovka   num_datas_in_string @ 2 >
-		IF
-			I 2  kalibrovka   take_data_in_number \  FDUP F.  \ F>D
-			
+\		kalibrovka num_datas_in_string @ 
+\		DUP 1 >
+\		IF
+\			1 
+\			DO	
+			I 0  kalibrovka    take_data_in_number \ FDUP F.   \ F>D frequency
+			-1   >FNUM   STR>S  >R R@ STR@ DROP  1 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
+			I 1  kalibrovka    take_data_in_number \ FDUP F.  \ F>D
+			-1   >FNUM STR>S  >R R@ STR@ DROP 2 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
+			I 2  kalibrovka   take_data_in_number \  FDUP F.  \ F>D			
 			-1   >FNUM STR>S  >R R@ STR@ DROP 3 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE		
-		THEN
-	\	LOOP
 
-		\ -1 I 0 adr u STR>S DUP >R STR@ DROP 1  s DUP >R STR@ DROP 2   iter_store_pribor liststore_param_prib  @ 9 gtk_list_store_set DROP R> STRFREE  R> STRFREE  
-	CR
+\		THEN
+ 	CR
 	LOOP  
 \ kalibrovka @ ^ datas @  DUP . F@ F. 
 THEN
 ; 
 
- 
- 
 : LoadKalFile {   \ s s2  flag file  }
 	"" -> s
 	-1 -> flag
@@ -167,6 +181,25 @@ THEN
 \		."  kalibrovka:  "  kalibrovka     SeeDatas  
 	THEN
 Refresh_param_kal_list
+;
+: AddNewFreq
+\ kalibrovka SeeDatas
+\	LoadKalibrovka flag !
+\	kalibrovka   num_datas @  1 - 0 kalibrovka    adr_data_in_number   F@  F. 
+\	kalibrovka   num_datas @      0 kalibrovka    adr_data_in_number F!   
+\
+\	kalibrovka   num_datas @  2 - 1 kalibrovka    adr_data_in_number F@   
+\	kalibrovka   num_datas @  1 - 1 kalibrovka    adr_data_in_number F!   
+\
+\	kalibrovka   num_datas @  2 - 2 kalibrovka    adr_data_in_number F@   
+\	kalibrovka   num_datas @  1 - 2 kalibrovka    adr_data_in_number F!   
+\
+\	KalFeleName ASCIIZ>  STR>S kalibrovka  SaveData
+\	kalibrovka      SeeDatas 	
+\	kalibrovka      ^ dispose	
+\	LoadKalFile
+\	kalibrovka   num_datas @ 1 +	kalibrovka    num_datas ! 
+\ Refresh_param_kal_list
 ;
 
  :NONAME 
@@ -320,6 +353,14 @@ tree_view  ! path !  column !
 CALLBACK:  treeview_param_prib_click 
 	 
 
+:NONAME 
+\	|| D: flag ||  
+-1 TO FlagConnectData 
+
+	window @  ;  1 CELLS  
+CALLBACK: buttonAdd_click 
+
+
   :NONAME 
  
 \ 	."  press " CR
@@ -362,7 +403,7 @@ CALLBACK:  treeview_param_prib_click
 	    " row-activated"    >R 0 0 0  ['] treeview_param_prib_click R@ STR@ DROP treeview_param_kal @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 
 	 " buttonAdd" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonAdd  !    R> STRFREE \ 2DROP
-\	  " clicked"  >R 0 0 0  ['] buttonAdd_click R@ STR@ DROP buttonAdd @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
+ 	  " clicked"  >R 0 0 0  ['] buttonAdd_click R@ STR@ DROP buttonAdd @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
 
 	 " buttonDel" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonDel  !    R> STRFREE \ 2DROP
 \	  " clicked"  >R 0 0 0  ['] buttonDel_click R@ STR@ DROP buttonDel @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
@@ -392,9 +433,9 @@ CALLBACK:  treeview_param_prib_click
 \	 " dialog_entry_freq" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_freq !    R> STRFREE \ 2DROP
 \	 " dialog_entry_data" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_data !    R> STRFREE \ 2DROP
 \	 " dialog_entry_begindata" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_begindata !    R> STRFREE \ 2DROP	
-	\ " dialog_filechooserbutton"  >R  R@ STR@  DROP builder_pribor @  2 gtk_builder_get_object dialog_filechooserbutton !    R> STRFREE \ 2DROP
-	\   dialog @  1 gtk_widget_hide DROP 
-	 \ dialog  @  1 gtk_widget_show DROP \ DROP
+\	\ " dialog_filechooserbutton"  >R  R@ STR@  DROP builder_pribor @  2 gtk_builder_get_object dialog_filechooserbutton !    R> STRFREE \ 2DROP
+	 dialog @  1 gtk_widget_hide DROP 
+	 dialog  @  1 gtk_widget_show DROP \ DROP
 
  	0 ['] timer_ticket  1000 3 g_timeout_add DROP
 
@@ -413,3 +454,6 @@ STARTLOG
 
   
    start
+   
+\EOF
+ 

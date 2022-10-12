@@ -247,7 +247,7 @@ adr n
 str STR@ ONLYNUMBER  -> u -> adr
 u 0= IF 0 EXIT THEN
 -1 -> flag
- adr u  "   <" STYPE TYPE   " >   " STYPE 
+\ adr u  "   <" STYPE TYPE   " >   " STYPE 
 u  DUP -> m1 -> m2
 u 0  DO
 adr I + C@  [CHAR] . = IF  I -> m1 THEN
