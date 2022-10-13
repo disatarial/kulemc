@@ -186,9 +186,9 @@ N_write !
    (   adr_data,   n_Data )
 	 SELF TO tekdata 
 	 num_datas_in_string ! 0  num_datas ! \ :SetData  
-	 num_datas_in_string @ FLOATS *  CELL + ALLOCATE THROW   datas !
- 
+	 num_datas_in_string @ FLOATS *  CELL + ALLOCATE THROW   datas ! 
 ;
+
  : SeeDatas \ { adr \ --  }
 	 \ || D: adr || adr !
 	\ num_datas @  . num_datas_in_string @  . CR
@@ -198,11 +198,11 @@ N_write !
 	IF
 		0 
 		DO
-\			I take_freq_in_number F.
+			I . 
 			num_datas_in_string @  
-			DUP 1 >
+			DUP 0 >
 			IF
-				1 
+				0 
 				DO
 					J I take_data_in_number F. 
 				LOOP
@@ -263,25 +263,30 @@ N_write !
  : SaveFile  \  сохранить табличку в файл  
  \ s-filename
 || D: file ||
-." SaveFile... "
+." SaveFile... num_datas = " num_datas @  . ." num_datas_in_string = " num_datas_in_string @ .
 	outFileCreate file !
 	CR
-	num_datas @ 
-	0 
-	DO
-		I take_freq_in_number   \ FDUP  
-		file @ FtoFile   \  F.
-		num_datas_in_string @ 1 
-		DO
-			J I take_data_in_number  FDUP file @ FtoFile  F.
-		LOOP
-	file @ CRtoFile 
+	num_datas @ DUP 1 >
+        IF
+	  0 
+	  DO
+	\	I take_freq_in_number   \ FDUP  
+	\	file @ FtoFile   \  F.
+		num_datas_in_string @ 0 >
+		IF
+          		num_datas_in_string @ 0 
+	         	DO
+				J I take_data_in_number  FDUP file @ FtoFile  F.
+			LOOP
+		THEN
+	  file @ CRtoFile 
 	\		CR
-	LOOP 
+           LOOP
+	THEN 
 	file @ outFileClose 
 ." ... SaveFile "
 ;
-: SaveFile DROP CR ." SaveFile" CR ;
+\ : SaveFile DROP CR ." SaveFile" CR ;
 
 : LoadFile  (  name     -- ) \ загрузить табличку из файла "name"  с кличеством колонок "col"
 || D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow ||
@@ -302,7 +307,7 @@ N_write !
  BEGIN	   
 	str @ 1023    file @ READ-LINE  
 	THROW DROP len !
-	numrow  @ 0 = IF str @ len @ STR>S NumWordsString  numrow ! THEN
+	len @  IF str @ len @ STR>S NumWordsString  numrow ! THEN
  
 \	str @ len @ TYPE  CR
 	num_datas @ 1 + num_datas ! 
@@ -315,7 +320,8 @@ UNTIL
 \	str @  
 \ STR>S NumWordsString 
 \ 5 
-numrow @  1 +  DUP max_datas ! col !
+numrow @    DUP max_datas ! col !
+
 
 
  file @ CLOSE-FILE THROW
@@ -327,9 +333,8 @@ col @ 	 num_datas_in_string !   \ :SetData
 
  \  datas @ dispose
    
-num_datas @ col @   * FLOATS   CELL +     ALLOCATE THROW   datas !
-
-num_datas @ 0 > 
+num_datas @ 2 + col @   * FLOATS     ALLOCATE THROW   datas !
+ num_datas @ 0 > 
 IF
    name @ STR@ R/O   OPEN-FILE   
    IF ." file not open" DROP
@@ -343,14 +348,16 @@ IF
 		THROW DROP len !
 		\ I . str @ len @ TYPE  CR
 		num_datas_in_string @ 0
-		DO  I   Icorrect @  - \ .
-		   str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
+		DO  
+ 		\ I   Icorrect @  -  .
+ 		   str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
 		   S>FLOAT  0 =
-		   J I Icorrect @ -  adr_data_in_number F!		     
-		   IF
+ 		   J I  Icorrect @ -   \ совместимость с прошлыми версиями
+		   adr_data_in_number F!		     
+ 		   IF
 			Icorrect @ 1 + Icorrect !
 		   THEN
-		   
+	   
 		LOOP 
 		\ CR
 	LOOP
@@ -359,8 +366,7 @@ IF
 ELSE
 		     0e 0 0  adr_data_in_number F!
 THEN
-
- str @ FREE  DROP
+  str @ FREE  DROP
 ;
 
 

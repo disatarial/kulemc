@@ -124,19 +124,19 @@ IF
 	kalibrovka @ ^  num_datas @  
 	0 
 	DO
-		I kalibrovka @ ^   take_freq_in_number F.
+\		I kalibrovka @ ^   take_freq_in_number F.
 		I iter_store_pribor  liststore_param_kal  @  3 gtk_list_store_insert DROP   			
 		 -1 I 0 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 
 	\	kalibrovka @  ^ num_datas_in_string @ 
 	\	0 
 	\	DO	
-		I 0  kalibrovka @ ^ take_data_in_number  FDUP F.   \ F>D frequency
+		I 0  kalibrovka @ ^ take_data_in_number  \ FDUP F.   \ F>D frequency
 
  \ F->Mega 
 ->degree  F/
    \   перевели в мгц 
 		-1   >FNUM   STR>S  >R R@ STR@ DROP  1  iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
-		I 1  kalibrovka @ ^  take_data_in_number FDUP F.  \ F>D
+		I 1  kalibrovka @ ^  take_data_in_number \ FDUP F.  \ F>D
 		-1   >FNUM STR>S  >R R@ STR@ DROP 2 iter_store_pribor liststore_param_kal  @ 5 gtk_list_store_set DROP 	R> STRFREE	
 		kalibrovka @ ^ num_datas_in_string @ 2 >
 		IF
@@ -196,7 +196,8 @@ THEN
 			."  kalibrovka:  "  kalibrovka @    SeeDatas  
 \		THEN 
 \		CR	
-	\	INCLUDE-PROBE   .S  -> file
+	\	INCLUDE-PROBE   
+	.S \ -> file
 	THEN
 
 	
@@ -206,7 +207,7 @@ THEN
 || D: file D: dir ||
 	CR ." end- "   .S CR 
 	LoadKalFile 
-\	Refresh_param_kal_list
+	Refresh_param_kal_list
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_current_folder    dir !
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_filename    file !
 
@@ -220,7 +221,7 @@ THEN
  	window @   ;  1 CELLS  
 CALLBACK: filechooserbutton_kal_open  
 
-( :NONAME
+ :NONAME
 || D: column D: path D: tree_view  D: model   ||
 tree_view  ! path !  column !
 	." TreeView_start_metod_click"  CR
@@ -249,7 +250,7 @@ tree_view  ! path !  column !
 	THEN
 	column  @ path @ tree_view @	window @   ;  3 CELLS  
 CALLBACK:  treeview_param_prib_click 
-	 )
+	 
 	 
 \ :NONAME   
 \ 	window @  ;  1 CELLS  
@@ -431,23 +432,28 @@ CALLBACK: button_cancel_click
  
 :NONAME 
 	|| D: flag ||  
-\	LoadKalibrovka 
--1 flag !
+-1  flag !
 LoadKalFile
-	kalibrovka @    ^ num_datas @ 1 +	kalibrovka @    ^ num_datas !
-	kalibrovka @    ^ num_datas @  2 - 0 kalibrovka @    ^  adr_data_in_number F@   
-	kalibrovka @    ^ num_datas @  1 - 0 kalibrovka @    ^  adr_data_in_number F!   
+kalibrovka @    ^ num_datas @  kalibrovka @    ^ max_datas  1 - <
+kalibrovka @    ^ num_datas @ 1 > OR
+IF
+	kalibrovka @    ^ num_datas @  1 - 0 kalibrovka @    ^  adr_data_in_number F@   
+	kalibrovka @    ^ num_datas @      0 kalibrovka @    ^  adr_data_in_number F!   
 
-	kalibrovka @    ^ num_datas @  2 - 1 kalibrovka @    ^  adr_data_in_number F@   
-	kalibrovka @    ^ num_datas @  1 - 1 kalibrovka @    ^  adr_data_in_number F!   
+	kalibrovka @    ^ num_datas @  1 - 1 kalibrovka @    ^  adr_data_in_number F@   
+	kalibrovka @    ^ num_datas @      1 kalibrovka @    ^  adr_data_in_number F!   
 
-	kalibrovka @    ^ num_datas @  2 - 2 kalibrovka @    ^  adr_data_in_number F@   
-	kalibrovka @    ^ num_datas @  1 - 2 kalibrovka @    ^  adr_data_in_number F!   
+	kalibrovka @    ^ num_datas @  1 - 2 kalibrovka @    ^  adr_data_in_number F@   
+	kalibrovka @    ^ num_datas @      2 kalibrovka @    ^  adr_data_in_number F!  
+	 
+	kalibrovka @    ^ num_datas @ 1 +    kalibrovka @    ^ num_datas !
 
 	KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ SaveFile \ SaveData
+
 	kalibrovka @    SeeDatas 	
 \	kalibrovka @    ^ dispose	
-	filechooserbutton_kal_open
+	filechooserbutton_kal_open 
+THEN
 	window @  ;  1 CELLS  
 CALLBACK: buttonAdd_click 
 
@@ -512,9 +518,9 @@ createtablkalibr
  
 
 	  \ готовим окошко под параметры оборудования
-\	    " treeview_param_prib"  >R R@ STR@ DROP builder_pribor    @ 2 gtk_builder_get_object treeview_param_kal ! R> STRFREE
-\	    " liststore_param_kal" >R R@ STR@ DROP builder_pribor   @ 2 gtk_builder_get_object liststore_param_kal ! R> STRFREE  
-\	    " row-activated"    >R 0 0 0  ['] treeview_param_prib_click R@ STR@ DROP treeview_param_kal @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+	    " treeview_param_prib"  >R R@ STR@ DROP builder_pribor    @ 2 gtk_builder_get_object treeview_param_kal ! R> STRFREE
+	    " liststore_param_kal" >R R@ STR@ DROP builder_pribor   @ 2 gtk_builder_get_object liststore_param_kal ! R> STRFREE  
+	    " row-activated"    >R 0 0 0  ['] treeview_param_prib_click R@ STR@ DROP treeview_param_kal @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 
 	 " buttonAdd" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonAdd  !    R> STRFREE \ 2DROP
 	  " clicked"  >R 0 0 0  ['] buttonAdd_click R@ STR@ DROP buttonAdd @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
@@ -577,9 +583,9 @@ STARTLOG
    start
 
 
-\    FALSE TO ?GUI
+    FALSE TO ?GUI
   \   ' CECONSOLE MAINX !
-\	 ' start MAINX !
- \        S" kalfile.exe"  SAVE
+	 ' start MAINX !
+        S" kalfile.exe"  SAVE
 \	BYE
 
