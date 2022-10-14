@@ -247,6 +247,6 @@ STARTLOG
   FALSE TO ?GUI
   \   ' CECONSOLE MAINX !
 	 ' start MAINX !
-         S" emctest.exe"  SAVE
+         S" kulemc.exe"  SAVE
 \	BYE
 \ start

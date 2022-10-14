@@ -111,9 +111,10 @@ here S" Файл результата"						3 256		Add_sysup-metod-info TO  vfil
 here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
 here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
 here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\ HERE here :save_next_sysup-metod-info -> here 
-
 ;
 
+
+	
 : SeeOne \ подготовить в выводу описание переменной из настроек
 	{ n \ i adr -- } ( n -- num/fnum  flag adr u    | flag )
 	\ flag:   0 - нет описания 1 - целое 2-действительное 3- строка 4 -имя файла  калибровки, 5 -имя файла  прибора
@@ -352,10 +353,10 @@ UNTIL
 	."  kalibrovka " CR	    
 \ создали объект-основу калибровки
 	500 PAUSE
-	tabl_kalibr NewObj vkalibrovka @  !
+
 	."  include kalibrovka  " CR	   
 
-vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S 5 vkalibrovka  @ @ ^ LoadFile	\ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
+	vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S  vkalibrovka  @ @ ^ LoadFile	\ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
 
 
 \		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
@@ -418,7 +419,7 @@ vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S 5 vkalibrovka  @ @ ^ LoadFile	\ vf
 	vgenerator @	@  FreeObj
 	\ metod-info kalibr_izm	@  FreeObj
 \ удаление таблиц	
-	vkalibrovka  @ @   FreeObj
+\	vkalibrovka  @ @   FreeObj
 	; 
 
 	
@@ -545,6 +546,7 @@ VARIABLE button_error
 VARIABLE dialog_entry
 VARIABLE dialog_label
 VARIABLE dialog_filechooserbutton 
+VARIABLE dialog_filechooserpribor
 
 \ различные итераторвы
  0 , HERE  64 ALLOT  VALUE iter_store_text
@@ -1004,6 +1006,8 @@ CALLBACK: but_pause_click
 	1 button_start @ 2 gtk_widget_set_sensitive DROP
 	0 button_stop @ 2 gtk_widget_set_sensitive DROP
 	0 button_pause @ 2 gtk_widget_set_sensitive DROP
+tabl_kalibr NewObj vkalibrovka @  !
+
 ;
 
 
