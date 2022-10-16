@@ -187,17 +187,17 @@ THEN
 		s STR@ KalFeleName SWAP 1 + CMOVE 
 		\ CR .S CR
 \		  kalibrovka @ s STR@   INCLUDE-PROBE   -> file  \  ERR-INCLUDE-PROBE
-		  s kalibrovka @ :LoadFile   
+		  s kalibrovka @ :LoadFile  \  DROP
 		\ CR .S CR
 \		file 
-\		IF 
-\			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-\		ELSE     
+		IF 
+			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
+		ELSE     
 			."  kalibrovka:  "  kalibrovka @    SeeDatas  
-\		THEN 
+		THEN 
 \		CR	
 	\	INCLUDE-PROBE   
-	.S \ -> file
+\	.S \ -> file
 	THEN
 
 	
@@ -207,7 +207,7 @@ THEN
 || D: file D: dir ||
 	CR ." end- "   .S CR 
 	LoadKalFile 
-	Refresh_param_kal_list
+ 	Refresh_param_kal_list
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_current_folder    dir !
 \	filechooserbutton_kal  @ 1 gtk_file_chooser_get_filename    file !
 
@@ -260,13 +260,13 @@ CALLBACK:  treeview_param_prib_click
 	|| D: flag ||
 	\ kalibrovka @ KalFeleName   ASCIIZ>  INCLUDE-PROBE     0 =  
 	-1 flag !	
-	 KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ LoadFile   \ ASCIIZ>  INCLUDE-PROBE     0 =  flag !	
+	 KalFeleName ASCIIZ>  STR>S kalibrovka @ ^ LoadFile  \ DROP  \ ASCIIZ>  INCLUDE-PROBE     0 =  flag !	
 \	flag @
-\	IF 
-\		."  kalibrovka:  "  kalibrovka @    SeeDatas  
-\	ELSE     
-\		"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-\	THEN 
+	IF 
+		."  kalibrovka:  "  kalibrovka @    SeeDatas  
+	ELSE     
+		"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
+	THEN 
 \	-1 flag @
 ; 
  

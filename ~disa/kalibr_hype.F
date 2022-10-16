@@ -46,6 +46,8 @@ init:
 	1 num_datas_in_string ! 
 	0  num_datas ! \ :SetData  
 	1 FLOATS   ALLOCATE THROW   datas !
+CR ." INITIALIZATION  tabl_kalibr complite" CR
+
 ;
  
 : deltaFreq ( freq1 freq2 - flag) \ сравнение 2х  чисел c дельной аналог F= с учетом погрешностей ПК
@@ -229,9 +231,9 @@ N_write !
 	 num_datas @ 1 + num_datas   !
 ;
 
-: dispose 
-	datas @ FREE THROW  
-	0 num_datas !
+: Free_tabl_kalibr 
+	\ datas @ FREE THROW  
+\	0 num_datas !
 	
 ;
 
@@ -288,85 +290,91 @@ N_write !
 ;
 \ : SaveFile DROP CR ." SaveFile" CR ;
 
-: LoadFile  (  name     -- ) \ загрузить табличку из файла "name"  с кличеством колонок "col"
-|| D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow ||
+: LoadFile  (  name     -- flag   ) \ загрузить табличку из файла "name"   o - нормально  -1 ошибка
+|| D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow D: flag ||
  \  col !
   name ! 
  0 numrow !
+ 0 flag !
    1024 ALLOCATE  THROW  str !
 
 \ + 1. считаем кол-во данных в файле  зная кол-во столбцов   num_datas_in_string    NextWord 
 \ 2. выделяем соостественно памяти
 \ 3. читаем поочереди цифры, и пишем их по порядку в табличку.
- name @ STR@ R/O   OPEN-FILE   
-	  IF ." file not open"
+name @ STR@ R/O   OPEN-FILE   
+ IF  ." file not open 1 "
+	   -1 flag !
 	 DROP
-	  ELSE
-	   file ! 
-	  0 num_datas ! 
- BEGIN	   
-	str @ 1023    file @ READ-LINE  
-	THROW DROP len !
-	len @  IF str @ len @ STR>S NumWordsString  numrow ! THEN
+ELSE
+	." file  open 1 "
+	file ! 
+	0 num_datas ! 
+	BEGIN	   
+		str @ 1023    file @ READ-LINE   
+		IF  DROP -1 flag ! 0 len ! ELSE  DROP len ! THEN 
+		len @  \ DUP ."  len= " . 
+		 IF str @ len @ STR>S NumWordsString  numrow ! THEN
  
-\	str @ len @ TYPE  CR
-	num_datas @ 1 + num_datas ! 
-len @ 0 = 
-UNTIL
+		num_datas @ 1 + num_datas ! 
+		len @ 0 = 
+\
+	UNTIL
+
 	num_datas @ 1 - num_datas ! 
 \ в последней строке считаем  кол-во слов
 
-\ ." num=" numrow @ . 
+	." num=" numrow @ . 
 \	str @  
 \ STR>S NumWordsString 
 \ 5 
-numrow @    DUP max_datas ! col !
-
-
-
- file @ CLOSE-FILE THROW
+	numrow @    DUP max_datas ! col !
+	file @ CLOSE-FILE   IF  -1 flag !  ." file not close 1 " ELSE ." file close 1 "THEN
 THEN 
 CR name @ STR@ TYPE ."  num_datas = " num_datas @ .  ." numrow = " numrow @  . CR
 
 SELF TO tekdata 
 col @ 	 num_datas_in_string !   \ :SetData  
 
- \  datas @ dispose
+      Free_tabl_kalibr
    
 num_datas @ 2 + col @   * FLOATS     ALLOCATE THROW   datas !
  num_datas @ 0 > 
 IF
    name @ STR@ R/O   OPEN-FILE   
-   IF ." file not open" DROP
+   IF  -1 flag ! ." file not open 2 " DROP
    ELSE  
+   ." file open 2 "  
     file ! 
 
 	num_datas @ 0  
 	DO	
 	0 Icorrect ! 
 		 str @ 1023    file @ READ-LINE  
-		THROW DROP len !
-		\ I . str @ len @ TYPE  CR
-		num_datas_in_string @ 0
-		DO  
- 		\ I   Icorrect @  -  .
- 		   str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
-		   S>FLOAT  0 =
- 		   J I  Icorrect @ -   \ совместимость с прошлыми версиями
-		   adr_data_in_number F!		     
- 		   IF
-			Icorrect @ 1 + Icorrect !
-		   THEN
+		IF DROP  -1 flag ! 
+		ELSE DROP len ! 
+			 I . str @ len @ TYPE  CR
+			num_datas_in_string @ 0
+			DO  
+			\ I   Icorrect @  -  .
+				str @ len @ STR>S I  N_S_PickUpWord \ STYPE ."  "
+				S>FLOAT  0 =
+				J I  Icorrect @ -   \ совместимость с прошлыми версиями
+				adr_data_in_number F!		     
+				IF
+					Icorrect @ 1 + Icorrect !
+				THEN
 	   
-		LOOP 
+			LOOP
+		THEN 
 		\ CR
 	LOOP
-     file @ CLOSE-FILE THROW
-    THEN   
+	file @ CLOSE-FILE  IF  -1 flag !  ." file not close 2 " ELSE ." file close 2 " THEN   
 ELSE
 		     0e 0 0  adr_data_in_number F!
 THEN
   str @ FREE  DROP
+   flag @
+
 ;
 
 

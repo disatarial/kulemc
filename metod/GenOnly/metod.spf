@@ -329,14 +329,14 @@ UNTIL
 
 : BEGIN:  
 \	see
-	."  include file_generator  " CR	   
-	vfile_generator_buf @ DUP 1+ SWAP  C@  2DUP INCLUDE-PROBE IF " error in file generator " TO_ERROR_PROG_BUFER  -1 THROW THEN
+\	."  include file_generator  " CR	   
+	vfile_generator_buf @ DUP 1+ SWAP  C@  2DUP INCLUDE-PROBE IF " error in file generator " TO_ERROR_PROG_BUFER  -1 THROW ELSE 	."  file_generator  included " CR	   THEN
 	NewObj vgenerator @ !
-	500 PAUSE
+\	500 PAUSE
 \ запуск устройств	
-	."  start...   " CR	    
-	 vfile_generator_buf	@  vgenerator @	@ ^ Start IF " generator not found " TO_ERROR_PROG_BUFER  -1 THROW THEN
-	."  ...start  " CR	    
+\	."  start...   " CR	    
+	 vfile_generator_buf	@  vgenerator @	@ ^ Start IF " generator not found " TO_ERROR_PROG_BUFER  -1 THROW ELSE ." generator  work " THEN
+\	."  ...start  " CR	    
  
 \	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
 \	vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
@@ -354,13 +354,14 @@ UNTIL
 \ создали объект-основу калибровки
 	500 PAUSE
 
-	."  include kalibrovka  " CR	   
+	."  include kalibrovka:  " CR	   
 
-	vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S  vkalibrovka  @ @ ^ LoadFile	\ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
+	vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S  	vkalibrovka  @ @ ^ LoadFile	
+	 \ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
+	."  kalibrovka  included. " CR	   
 
-
-\		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
-\		ELSE ."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  THEN CR
+		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
+		ELSE ."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  THEN CR
 
 	\ результаты	подготовили файл
 	" .\result\result.txt"   outFileCreate vresult @ !
@@ -546,7 +547,13 @@ VARIABLE button_error
 VARIABLE dialog_entry
 VARIABLE dialog_label
 VARIABLE dialog_filechooserbutton 
+
 VARIABLE dialog_filechooserpribor
+
+
+
+VARIABLE dialog_end_work_save
+VARIABLE dialog_end_work_end
 
 \ различные итераторвы
  0 , HERE  64 ALLOT  VALUE iter_store_text
@@ -688,7 +695,8 @@ CALLBACK: button_close_metod_click
 		ELSE DROP -1 -> flag 
 		THEN
 	THEN
-	dialog   @ 1 gtk_widget_hide DROP Refresh_list 
+	dialog   @ 1 gtk_widget_hide DROP 
+	Refresh_list 
 	dialog   @  ;  1 CELLS  
 CALLBACK: button_norma_click
 
@@ -828,7 +836,7 @@ CALLBACK: but_start_click
 \ CALLBACK: dialog_end_work_destroy
 
 :NONAME { \ s }
-." ."
+\ ." ."
 	Str_Data_buffer   STR>S -> s
 	s STR@ NIP 
 	IF   ."  >"  s STR@ TYPE ." <   " \ TYPE
@@ -878,6 +886,8 @@ CALLBACK: but_start_click
 \                                      NULL);
 \ 0 0 0 0 0 0 
 
+		dialog_end_work @  1 gtk_widget_show DROP
+
 		work_Stop work-info -upravl_thead- !       \  2DUP . .    | стоп
 \ dialog_end_work_destroy
 \	" destroy"  >R 0 0 0  ['] on_dialog_end_work_destroy  R@ STR@ DROP WinMetod @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP	
@@ -921,6 +931,19 @@ CALLBACK:  timer_ticket
 	THEN	
 	0 ;  1 CELLS  
 CALLBACK: but_pause_click
+
+:NONAME  ." dialog_end_work_save_click"	
+work_Stop work-info -upravl_thead- !
+	 dialog_end_work @  1 gtk_widget_hide DROP 
+
+	0 ;  1 CELLS  
+CALLBACK:  dialog_end_work_save_click
+
+:NONAME  ." dialog_end_work_end_click"	
+	work_Stop work-info -upravl_thead- !
+	 dialog_end_work @  1 gtk_widget_hide DROP 
+	0 ;  1 CELLS  
+CALLBACK:  dialog_end_work_end_click
 
 
 : StartMetod  {   \ tekFile }
@@ -1006,6 +1029,19 @@ CALLBACK: but_pause_click
 	1 button_start @ 2 gtk_widget_set_sensitive DROP
 	0 button_stop @ 2 gtk_widget_set_sensitive DROP
 	0 button_pause @ 2 gtk_widget_set_sensitive DROP
+
+
+	\ поднятие диалога  сохранения результата вот тут проблемма что если удалять и включать. то  втором и последующих включениях появляетя голое окно без кнопочек.
+	 " dialog_end_work" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object dialog_end_work !    R> STRFREE \ изменяемая надпись
+	 dialog_end_work @  1 gtk_widget_hide DROP 
+
+	 " dialog_end_work_save" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object dialog_end_work_save !    R> STRFREE \ 2DROP
+	 " clicked"  >R 0 0 0  ['] dialog_end_work_save_click   R@ STR@ DROP dialog_end_work_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
+	 " dialog_end_work_end" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object dialog_end_work_end !    R> STRFREE \ 2DROP
+	 " clicked"  >R 0 0 0  ['] dialog_end_work_end_click   R@ STR@ DROP dialog_end_work_end @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
+
 tabl_kalibr NewObj vkalibrovka @  !
 
 ;
