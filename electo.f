@@ -1,6 +1,6 @@
 STARTLOG
  REQUIRE CAPI: lib/win/api-call/capi.f
- REQUIRE gtk_init  /emctest/gtk-api.spf
+ REQUIRE gtk_init  gtk-api.spf
  REQUIRE CASE  lib/ext/case.f
  REQUIRE WildCMP-U ~pinka/lib/mask.f \ \ сравнение строки и маски, для  проверки ответа оборудования
  REQUIRE objLocalsSupport ~day/hype3/locals.f \ локальные переменные

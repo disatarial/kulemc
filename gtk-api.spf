@@ -80,6 +80,10 @@ CVAPI: gtk_image_set_from_file			libgtk-3-0.dll
 
 CVAPI: gtk_toggle_button_get_active		libgtk-3-0.dll 
 
+CVAPI: gtk_file_chooser_dialog_new		libgtk-3-0.dll 
+
+
+
 WINAPI: Beep Kernel32.dll    
 0
 CELL -- domain
@@ -89,3 +93,58 @@ CONSTANT GError
 HERE DUP >R GError  DUP ALLOT ERASE VALUE GtkError
 
 
+(
+typedef enum
+{
+  /* GTK возвращает это если ответ виджета не имеет response_id,
+   * или если диалог с точки зрения программы скрыт или разрушен.
+   */
+  GTK_RESPONSE_NONE = -1,
+
+  /* GTK не будет возвращать их если вы не помещаете их как 
+   * ответ для виджета действия. Они для вашего
+   * удобства.
+   */
+  GTK_RESPONSE_REJECT = -2,
+  GTK_RESPONSE_ACCEPT = -3,
+
+  /* Если диалог удалён. */
+  GTK_RESPONSE_DELETE_EVENT = -4,
+
+  /* Эти тоже возвращаются из диалогов GTK и вы можете использовать их
+   * самостоятельно если вам нравится.
+   */
+  GTK_RESPONSE_OK     = -5,
+  GTK_RESPONSE_CANCEL = -6,
+  GTK_RESPONSE_CLOSE  = -7,
+  GTK_RESPONSE_YES    = -8,
+  GTK_RESPONSE_NO     = -9,
+  GTK_RESPONSE_APPLY  = -10,
+  GTK_RESPONSE_HELP   = -11
+} GtkResponseType;
+ )
+-1 CONSTANT GTK_RESPONSE_NONE
+-2 CONSTANT  GTK_RESPONSE_REJECT
+-3 CONSTANT  GTK_RESPONSE_ACCEPT
+-4 CONSTANT GTK_RESPONSE_DELETE_EVENT
+-5 CONSTANT  GTK_RESPONSE_OK     
+-6 CONSTANT  GTK_RESPONSE_CANCEL 
+-7 CONSTANT  GTK_RESPONSE_CLOSE  
+-8 CONSTANT  GTK_RESPONSE_YES    
+-9 CONSTANT  GTK_RESPONSE_NO     
+-10 CONSTANT  GTK_RESPONSE_APPLY  
+-11 CONSTANT  GTK_RESPONSE_HELP   
+
+(
+typedef enum
+{
+  GTK_FILE_CHOOSER_ACTION_OPEN,
+  GTK_FILE_CHOOSER_ACTION_SAVE,
+  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+  GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER
+} GtkFileChooserAction;
+)
+0 CONSTANT  GTK_FILE_CHOOSER_ACTION_OPEN,
+1 CONSTANT  GTK_FILE_CHOOSER_ACTION_SAVE,
+2 CONSTANT  GTK_FILE_CHOOSER_ACTION_SELECT_FOLDER,
+3 CONSTANT  GTK_FILE_CHOOSER_ACTION_CREATE_FOLDER

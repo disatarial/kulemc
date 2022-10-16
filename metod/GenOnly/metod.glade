@@ -185,7 +185,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="button3">
+              <object class="GtkButton" id="dialog_end_work_end">
                 <property name="label" translatable="yes">Выйти</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
@@ -235,7 +235,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkFileChooserWidget" id="filechooserwidget1">
+              <object class="GtkFileChooserWidget" id="filechooserwidget_save">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="orientation">vertical</property>
@@ -269,7 +269,7 @@
     </child>
     <action-widgets>
       <action-widget response="0">dialog_end_work_save</action-widget>
-      <action-widget response="0">button3</action-widget>
+      <action-widget response="0">dialog_end_work_end</action-widget>
     </action-widgets>
   </object>
   <object class="GtkFileFilter" id="filefilter_kal">

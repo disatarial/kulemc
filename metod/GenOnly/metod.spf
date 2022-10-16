@@ -335,7 +335,7 @@ UNTIL
 \	500 PAUSE
 \ запуск устройств	
 \	."  start...   " CR	    
-	 vfile_generator_buf	@  vgenerator @	@ ^ Start IF " generator not found " TO_ERROR_PROG_BUFER  -1 THROW ELSE ." generator  work " THEN
+	 vfile_generator_buf	@  vgenerator @	@ ^ Start IF " generator not found " TO_ERROR_PROG_BUFER  -1 THROW ELSE ." generator  Ok " CR THEN
 \	."  ...start  " CR	    
  
 \	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
@@ -356,18 +356,21 @@ UNTIL
 
 	."  include kalibrovka:  " CR	   
 
-	vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S  	vkalibrovka  @ @ ^ LoadFile	
+	vfile_kalibrov_buf  @ DUP  1+  SWAP C@  STR>S  	vkalibrovka  @  @  ^ LoadFile	.
 	 \ vfile_kalibrov_buf  @ DUP  1+  SWAP C@   ERR-INCLUDE-PROBE 
 	."  kalibrovka  included. " CR	   
 
-		IF "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
-		ELSE ."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  THEN CR
+		IF
+\		."  kalibrovka:  " vkalibrovka  @ @ ^ SeeDatas  
+		ELSE 
+		 "  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER  error_out_file  work-info  ERROR_PROG !
+		THEN CR
 
 	\ результаты	подготовили файл
 	" .\result\result.txt"   outFileCreate vresult @ !
 	\ устанавливаем мин и макс по калибровке, если они не соответствуют ей
-	vFREQ_BEGIN @ F@  vkalibrovka  @ @ ^ MinMax vFREQ_BEGIN @ F! IF " минимальное  значение не соответствует калибровке. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
-	vFREQ_END @  F@  vkalibrovka  @ @ ^ MinMax vFREQ_END @  F! IF " максимальное значение не соответствует калибровке. Поправлено. {CRLF}" vresult @ @  StoFile THEN
+\	vFREQ_BEGIN @ F@  vkalibrovka  @ @ ^ MinMax vFREQ_BEGIN @ F! IF " минимальное  значение не соответствует калибровке. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
+\	vFREQ_END @  F@  vkalibrovka  @ @ ^ MinMax vFREQ_END @  F! IF " максимальное значение не соответствует калибровке. Поправлено. {CRLF}" vresult @ @  StoFile THEN
 	vFREQ_BEGIN @ F@ vFREQ @ F!  
 	
 	vFREQ_STEP @ F@ 0e F>
@@ -469,6 +472,9 @@ UNTIL
 
 
 : WorkCicle 
+tabl_kalibr NewObj vkalibrovka @  !
+
+
 	\ обнулили ошибки при запуске
 	CLEAR_ERROR_BUFER 
 	NoError work-info ERROR_PROG !
@@ -502,6 +508,7 @@ UNTIL
 	work_End_Work work-info -upravl_thead- !  \ ожидаем ответа оператора об завершении работы
 	
 	\ TERMINATE 
+\ tabl_kalibr NewObj vkalibrovka @  !
 	
 ;
 
@@ -565,6 +572,7 @@ VARIABLE textview_comment_metod
 VARIABLE textview_comment_bufer
 
 VARIABLE dialog_end_work \ 
+VARIABLE filechooserwidget_save
 
 
 : Refresh_list { \ adr u I flag  s  data-adr }
@@ -707,7 +715,9 @@ CALLBACK: button_norma_click
 CALLBACK: button_error_click
 
 
-:NONAME   {  column path tree_view \ model  flag  adr u  tekFile }
+:NONAME  
+.S
+ {  column path tree_view \ model  flag  adr u  tekFile }
 	." TreeView_start_metod_click"  CR
 	dialog @  1 gtk_widget_show DROP
 	\ выделенная строчка 
@@ -835,6 +845,24 @@ CALLBACK: but_start_click
 \ :NONAME
 \ CALLBACK: dialog_end_work_destroy
 
+:NONAME  ." dialog_end_work_save_click"	
+work_Stop work-info -upravl_thead- !
+
+	dialog_end_work @  1 gtk_widget_hide DROP 
+	dialog_end_work @  ;  1 CELLS  
+CALLBACK:  dialog_end_work_save_click
+
+:NONAME  ." dialog_end_work_end_click"	
+	work_Stop work-info -upravl_thead- !
+	 dialog_end_work @  1 gtk_widget_hide DROP 
+	dialog_end_work @  ;  1 CELLS  
+CALLBACK:  dialog_end_work_end_click
+
+:NONAME  ." filechooserwidget_save_activated"	
+0  ;  1 CELLS  
+CALLBACK: filechooserwidget_save_activated
+
+
 :NONAME { \ s }
 \ ." ."
 	Str_Data_buffer   STR>S -> s
@@ -876,22 +904,9 @@ CALLBACK: but_start_click
 	
 	work-info -upravl_thead- @    work_End_Work = \  2DUP . .    | программа завершила работу
 	IF
-\		" dialog_end_work"  >R R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object dialog_end_work !  R> STRFREE \ 2DROP
-\		dialog_end_work @  1 gtk_widget_show DROP \ DROP
-\ dialog = gtk_file_chooser_dialog_new ("Save File",
-\                                      parent_window,
-\                                      GTK_FILE_CHOOSER_ACTION_SAVE,
-\                                      GTK_STOCK_CANCEL, GTK_RESPONSE_CANCEL,
-\                                      GTK_STOCK_SAVE, GTK_RESPONSE_ACCEPT,
-\                                      NULL);
-\ 0 0 0 0 0 0 
-
-		dialog_end_work @  1 gtk_widget_show DROP
+	dialog_end_work @  1 gtk_widget_show DROP
 
 		work_Stop work-info -upravl_thead- !       \  2DUP . .    | стоп
-\ dialog_end_work_destroy
-\	" destroy"  >R 0 0 0  ['] on_dialog_end_work_destroy  R@ STR@ DROP WinMetod @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP	
-\	" button_close" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object button_close_metod  !    R> STRFREE \ 2DROP
 	THEN	
 
 	textview_result_bufer @  1 gtk_text_buffer_get_insert -> s
@@ -932,18 +947,6 @@ CALLBACK:  timer_ticket
 	0 ;  1 CELLS  
 CALLBACK: but_pause_click
 
-:NONAME  ." dialog_end_work_save_click"	
-work_Stop work-info -upravl_thead- !
-	 dialog_end_work @  1 gtk_widget_hide DROP 
-
-	0 ;  1 CELLS  
-CALLBACK:  dialog_end_work_save_click
-
-:NONAME  ." dialog_end_work_end_click"	
-	work_Stop work-info -upravl_thead- !
-	 dialog_end_work @  1 gtk_widget_hide DROP 
-	0 ;  1 CELLS  
-CALLBACK:  dialog_end_work_end_click
 
 
 : StartMetod  {   \ tekFile }
@@ -1033,6 +1036,8 @@ CALLBACK:  dialog_end_work_end_click
 
 	\ поднятие диалога  сохранения результата вот тут проблемма что если удалять и включать. то  втором и последующих включениях появляетя голое окно без кнопочек.
 	 " dialog_end_work" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object dialog_end_work !    R> STRFREE \ изменяемая надпись
+	 " desroy-event"  >R 0 0 0  ['] dialog_end_work_end_click   R@ STR@ DROP dialog_end_work_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
 	 dialog_end_work @  1 gtk_widget_hide DROP 
 
 	 " dialog_end_work_save" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object dialog_end_work_save !    R> STRFREE \ 2DROP
@@ -1041,8 +1046,10 @@ CALLBACK:  dialog_end_work_end_click
 	 " dialog_end_work_end" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object dialog_end_work_end !    R> STRFREE \ 2DROP
 	 " clicked"  >R 0 0 0  ['] dialog_end_work_end_click   R@ STR@ DROP dialog_end_work_end @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 
+	 " filechooserwidget_save" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object filechooserwidget_save !    R> STRFREE \ 2DROP
+	 " file-activated"  >R 0 0 0  ['] filechooserwidget_save_activated   R@ STR@ DROP filechooserwidget_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+\ filechooserwidget_save
 
-tabl_kalibr NewObj vkalibrovka @  !
 
 ;
 

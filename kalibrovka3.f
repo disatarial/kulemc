@@ -1,7 +1,7 @@
 \ управление настройкой приборов
 STARTLOG
  REQUIRE CAPI: lib/win/api-call/capi.f
- REQUIRE gtk_init  \emctest/gtk-api.spf
+ REQUIRE gtk_init  gtk-api.spf
  REQUIRE  CASE  lib/ext/case.f
  REQUIRE WildCMP-U ~pinka/lib/mask.f \ \ сравнение строки и маски, для  проверки ответа оборудования
  REQUIRE  objLocalsSupport ~day/hype3/locals.f \ локальные переменные
@@ -191,9 +191,9 @@ THEN
 		\ CR .S CR
 \		file 
 		IF 
-			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
-		ELSE     
 			."  kalibrovka:  "  kalibrovka @    SeeDatas  
+		ELSE     
+			"  error_in_file_kalibrovka "  DUP STR@ TYPE TO_ERROR_PROG_BUFER 
 		THEN 
 \		CR	
 	\	INCLUDE-PROBE   
@@ -252,9 +252,27 @@ tree_view  ! path !  column !
 CALLBACK:  treeview_param_prib_click 
 	 
 	 
-\ :NONAME   
-\ 	window @  ;  1 CELLS  
-\ CALLBACK: buttonSavePribor_click  
+ :NONAME   
+."  buttonSavePribor "
+\ dialog = gtk_file_chooser_dialog_new ("Open File",
+\                                      parent_window,
+\                                      action,
+\                                      _("_Cancel"),
+\                                      GTK_RESPONSE_CANCEL,
+\                                      _("_Open"),
+\                                      GTK_RESPONSE_ACCEPT,
+\                                      NULL);
+
+\	0
+\	" gtk-save" STR@ DROP
+\	GTK_RESPONSE_ACCEPT
+\	0
+\		" Save File" DUP >R STR@ DROP
+\		3 gtk_file_chooser_dialog_new DROP  R> STRFREE
+
+
+ 	window @  ;  1 CELLS  
+ CALLBACK: buttonSavePribor_click  
  
 : LoadKalibrovka
 	|| D: flag ||
@@ -367,6 +385,11 @@ CALLBACK: button_norma_click
 	0 ;  1 CELLS  
 CALLBACK: button_error_click
 
+ 
+:NONAME 
+	dialog @  1 gtk_widget_hide DROP  
+	0 ;  1 CELLS  
+CALLBACK: destroy_click
  
 :NONAME 
 	|| D: adr D: u ||
@@ -501,12 +524,14 @@ createtablkalibr
 	error  " kalibr.glade"  >R R@ STR@  DROP  builder_pribor @ 3 gtk_builder_add_from_file DROP   R> STRFREE \ 2DROP	
 	" pribor"  >R R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object win_pribor !  R> STRFREE \ 2DROP
 	win_pribor @  1 gtk_widget_show DROP \ DROP
+
 	\ ДЕЙСТВО ЗАКРЫТИЕ ПРОГРАММЫ
 	" destroy"  >R 0 0 0  ['] on_pribor_destroy  R@ STR@ DROP win_pribor @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 	" buttonClosePribor" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonClosePribor  !    R> STRFREE \ 2DROP	
 	" clicked"  >R 0 0 0  ['] buttonClosePribor_click R@ STR@ DROP buttonClosePribor @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP 
-\	 " buttonSavePribor" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonSavePribor !    R> STRFREE \ 2DROP
-\	  " clicked"  >R 0 0 0  ['] buttonSavePribor_click R@ STR@ DROP buttonSavePribor @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
+	 " buttonSavePribor" >R  R@ STR@  DROP builder_pribor   @ 2 gtk_builder_get_object buttonSavePribor !    R> STRFREE \ 2DROP
+	  " clicked"  >R 0 0 0  ['] buttonSavePribor_click R@ STR@ DROP buttonSavePribor @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
     
 	  \ указатель для загрузки и  сохранении , устанавливаем фильтр для приборов
 	 " filechooserbutton_kal" >R  R@ STR@  DROP builder_pribor   @  2 gtk_builder_get_object filechooserbutton_kal !    R> STRFREE \ 2DROP
@@ -546,6 +571,10 @@ createtablkalibr
 	\ поднятие диалога выбора  вот тут проблемма что если удалять и включать. то  втором и последующих включениях появляетя голое окно без кнопочек.
 	\ " dialog_label" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_label !    R> STRFREE \ изменяемая надпись
 	 " dialog"  DUP >R STR@  DROP builder_pribor @ 2 gtk_builder_get_object  dialog !  R> STRFREE \ 2DROP
+\ убираем штатное закрытие, и меняем его на  метод кнопки
+	 " desroy-event"  >R 0 0 0  ['] destroy_click   R@ STR@ DROP dialog @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
+
 	 " button_norma" >R  R@ STR@  DROP builder_pribor @  2 gtk_builder_get_object button_norma !    R> STRFREE \ 2DROP
 	 " clicked"  >R 0 0 0  ['] button_norma_click   R@ STR@ DROP button_norma @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 	 " button_error" >R  R@ STR@  DROP builder_pribor @  2 gtk_builder_get_object button_error !    R> STRFREE \ 2DROP
@@ -553,6 +582,8 @@ createtablkalibr
 	 " dialog_entry_freq" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_freq !    R> STRFREE \ 2DROP
 	 " dialog_entry_data" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_data !    R> STRFREE \ 2DROP
 	 " dialog_entry_begindata" >R  R@ STR@  DROP builder_pribor @ 2 gtk_builder_get_object dialog_entry_begindata !    R> STRFREE \ 2DROP	
+
+
 	\ " dialog_filechooserbutton"  >R  R@ STR@  DROP builder_pribor @  2 gtk_builder_get_object dialog_filechooserbutton !    R> STRFREE \ 2DROP
 	\   dialog @  1 gtk_widget_hide DROP 
 	 \ dialog  @  1 gtk_widget_show DROP \ DROP

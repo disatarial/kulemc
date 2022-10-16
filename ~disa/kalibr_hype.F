@@ -290,7 +290,7 @@ N_write !
 ;
 \ : SaveFile DROP CR ." SaveFile" CR ;
 
-: LoadFile  (  name     -- flag   ) \ загрузить табличку из файла "name"   o - нормально  -1 ошибка
+: LoadFile  (  name     -- flag   ) \ загрузить табличку из файла "name"   -1 - нормально  0 -  ошибка
 || D: name   D: str  D: file  D: len    D: col D: Icorrect D: numrow D: flag ||
  \  col !
   name ! 
@@ -373,7 +373,7 @@ ELSE
 		     0e 0 0  adr_data_in_number F!
 THEN
   str @ FREE  DROP
-   flag @
+   flag @ 0 = 
 
 ;
 
