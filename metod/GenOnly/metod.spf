@@ -10,11 +10,10 @@
 	1 CONSTANT work_Execute   \ нормальный режим работы
 	2 CONSTANT work_Stop   \  программа остановлена, ожидаем запуска
 	3 CONSTANT work_End_Work   \  работа  закончилась ожидаем ответа оператора
-
 	3 CONSTANT work_Pause   \ пауза
  
  
-\ коды ошибок
+\ коды ошибок \ недоделано
 	1001 CONSTANT error_begin_problem
 	1002 CONSTANT error_end_problem
 	1003 CONSTANT error_cicle_problem
@@ -559,8 +558,7 @@ VARIABLE dialog_filechooserpribor
 
 
 
-VARIABLE dialog_end_work_save
-VARIABLE dialog_end_work_end
+
 
 \ различные итераторвы
  0 , HERE  64 ALLOT  VALUE iter_store_text
@@ -571,6 +569,9 @@ VARIABLE dialog_end_work_end
 VARIABLE textview_comment_metod
 VARIABLE textview_comment_bufer
 
+VARIABLE dialog_end_work_save
+VARIABLE dialog_end_work_end
+VARIABLE entry_save
 VARIABLE dialog_end_work \ 
 VARIABLE filechooserwidget_save
 
@@ -716,7 +717,7 @@ CALLBACK: button_error_click
 
 
 :NONAME  
-.S
+\ .S
  {  column path tree_view \ model  flag  adr u  tekFile }
 	." TreeView_start_metod_click"  CR
 	dialog @  1 gtk_widget_show DROP
@@ -846,7 +847,13 @@ CALLBACK: but_start_click
 \ CALLBACK: dialog_end_work_destroy
 
 :NONAME  ." dialog_end_work_save_click"	
-work_Stop work-info -upravl_thead- !
+ { \ adr u }
+	work_Stop work-info -upravl_thead- !
+		entry_save  @ 1 gtk_entry_get_text_length   DUP 0 > 
+		IF 
+			entry_save @ 1 gtk_entry_get_text    -> adr  -> u \ adr u 	
+	S" .\result\result.txt" adr u StrFileCopy
+		THEN
 
 	dialog_end_work @  1 gtk_widget_hide DROP 
 	dialog_end_work @  ;  1 CELLS  
@@ -859,6 +866,16 @@ CALLBACK:  dialog_end_work_save_click
 CALLBACK:  dialog_end_work_end_click
 
 :NONAME  ." filechooserwidget_save_activated"	
+filechooserwidget_save  @ 1 gtk_file_chooser_get_filename  DUP  ."  filechooserwidget_save_get_filename = " . CR
+	DUP  
+	IF  
+		ASCIIZ> STR>S \ STYPE CR \ work-info  file_nastr_buf  LOAD_TO_BUFER  0
+		DUP >R  STR@ DROP entry_save      @ 2 gtk_entry_set_text DROP R> STRFREE
+
+	ELSE 
+		DROP "  Error: nastr not found "   error_metod_file :ERROR   
+	THEN 
+
 0  ;  1 CELLS  
 CALLBACK: filechooserwidget_save_activated
 
@@ -927,6 +944,15 @@ CALLBACK: filechooserwidget_save_activated
 	ELSE 
 		DROP 	   " ./metod/GenOnly/" >R  R@ STR@  DROP dialog_filechooserbutton  @ 2 gtk_file_chooser_set_current_folder   R> STRFREE   ." filechooserbutton_pribor =" . CR	
 	THEN
+
+	filechooserwidget_save  @   1 gtk_file_chooser_get_current_folder DUP 
+	0<> 
+	IF 
+		DROP	\ ASCIIZ> TYPE 
+	ELSE 
+		DROP 	   " ./result/" >R  R@ STR@  DROP filechooserwidget_save  @ 2 gtk_file_chooser_set_current_folder   R> STRFREE   ." filechooserbutton_pribor =" . CR	
+	THEN
+
 	
 	Refresh_list
 	WinMetod_timer @  ;  1 CELLS  
@@ -1037,8 +1063,9 @@ CALLBACK: but_pause_click
 	\ поднятие диалога  сохранения результата вот тут проблемма что если удалять и включать. то  втором и последующих включениях появляетя голое окно без кнопочек.
 	 " dialog_end_work" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object dialog_end_work !    R> STRFREE \ изменяемая надпись
 	 " desroy-event"  >R 0 0 0  ['] dialog_end_work_end_click   R@ STR@ DROP dialog_end_work_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
-
 	 dialog_end_work @  1 gtk_widget_hide DROP 
+
+	 " entry_save" >R  R@ STR@  DROP builder_metod  @ 2 gtk_builder_get_object entry_save !    R> STRFREE \ 2DROP
 
 	 " dialog_end_work_save" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object dialog_end_work_save !    R> STRFREE \ 2DROP
 	 " clicked"  >R 0 0 0  ['] dialog_end_work_save_click   R@ STR@ DROP dialog_end_work_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP

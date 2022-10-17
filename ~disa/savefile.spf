@@ -76,3 +76,20 @@ file FLUSH-FILE THROW
 file  CLOSE-FILE THROW
 ;
 
+: StrFileCopy { s-name1 u-name1 s-name2 u-name2  \ id1 id2 len  buf[ 128 ] --  }
+s-name1 u-name1  TYPE ."   "  
+s-name2 u-name2 TYPE CR
+ s-name1 u-name1 R/O  OPEN-FILE-SHARED THROW -> id1
+ s-name2 u-name2 W/O CREATE-FILE-SHARED THROW -> id2 \ CREATE-FILE 
+
+BEGIN
+	buf[ 120  id1 READ-FILE THROW -> len
+	len . buf[ len  TYPE
+ 	buf[ len id2  WRITE-FILE THROW
+	len 0 = 
+UNTIL
+
+id1 CLOSE-FILE THROW
+id2 CLOSE-FILE THROW
+;
+
