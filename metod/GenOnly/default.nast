@@ -1,15 +1,16 @@
 COMMENT( )
- " C:\prog\SP-Forth\emctest\metod\test\default.kal                 "   0 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл настроек
+ " C:\prog\SP-Forth\emctest\metod\test\default.kal                   "   0 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Каталога метода
  "  1000 " S>FLOAT DROP F>D DROP  1 SeeOne  2DROP DROP !  \ Пауза между воздействиями, мс
  "  1000 " S>FLOAT DROP F>D DROP  2 SeeOne  2DROP DROP !  \ Время воздействия ,  мс
  "  1.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
- "  3.0000000e06 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
+ "  1.0000000e07 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
  "  1.0000000e06 " S>FLOAT DROP  5 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
  "  0 " S>FLOAT DROP F>D DROP  6 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
- " C:\progs\SPForth\kulemc\metod\GenOnly\1.kal   "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
- " C:\progs\SPForth\kulemc\prib\default\pribor.prib       "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
+ " C:\kulemc\metod\GenOnly\1.kal "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ " C:\kulemc\prib\TOE7761\pribor.prib    "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
  "  2.0000000e06 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
- "                  "   10 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл результата
- "  99313340 " S>FLOAT DROP F>D DROP  11 SeeOne  2DROP DROP !  \ Объект генератор
- "  99313268 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ Объект калибровка
- "  828 " S>FLOAT DROP F>D DROP  13 SeeOne  2DROP DROP !  \ файл результата
+ "                    "   10 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл результата
+ "  22151244 " S>FLOAT DROP F>D DROP  11 SeeOne  2DROP DROP !  \ Объект генератор
+ "  17327948 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ Объект калибровка
+ "  1508 " S>FLOAT DROP F>D DROP  13 SeeOne  2DROP DROP !  \ файл результата
+ "  2.0000000e01 " S>FLOAT DROP  14 SeeOne  2DROP DROP F!  \ Текущий уровень генератора

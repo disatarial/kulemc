@@ -117,8 +117,7 @@ MyDCB    idport @ GetCommState DROP
 
 : setDCBdefault
 MyDCB    idport @ GetCommState DROP
-seeDCB
-
+\ seeDCB
  20625 MyDCB Mode !
  8 MyDCB ByteSize C!
  MyDCB idport @  SetCommState  DROP
