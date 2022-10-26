@@ -3,8 +3,6 @@
 Воздействия необходим уровнем с предварительной калибровкой в заданных границах. 
 Сигнал "восстанавливается" по запомненному значению  генератора.
 load grafic file :./metod/GenOnly/bildo.png 
-load grafic file :./metod/../bildo.png 
-load grafic file :./metod/GenOnly/bildo.png 
 button_load_metod_click
 load metod file :./metod/GenOnly/metod.spf 
 StoFile isn't unique (./metod/GenOnly/metod.spf)
@@ -15,79 +13,11 @@ TYPE_BUFER isn't unique (./metod/GenOnly/metod.spf)
 timer_ticket isn't unique (./metod/GenOnly/metod.spf)
 load glade file :metod/GenOnly/metod.glade 
 gtk_file_chooser_set_uri =1 
- gtk_file_chooser_get_filename = 14674488 
+ gtk_file_chooser_get_filename = 14631952 
 LOAD_TO_BUFER 36 : C:\kulemc\metod\GenOnly\default.nast
-LOAD_TO_BUFER 66 : C:\prog\SP-Forth\emctest\metod\test\default.kal                   
-LOAD_TO_BUFER 30 : C:\kulemc\metod\GenOnly\1.kal 
-LOAD_TO_BUFER 38 : C:\kulemc\prib\TOE7761\pribor.prib    
-LOAD_TO_BUFER 19 :                    
-but_start_click
-INITIALIZATION  tabl_kalibr complite
- outFileCreate= .\result\result.txt  start:      11        52        3     
- INCLUDE toeliner FILE
-  TOE7761 COMPLITE 0 5797716 
- Файл генератора подключен   
- file generator complite  Запуск  генератора:   
- TOE7761 connecting..
-LOAD_TO_BUFER 5 : *TOE*
-LOAD_TO_BUFER 29 : .\interface\COMPORT.interface
-LOAD_TO_BUFER 4 : COM1
-LOAD_TO_BUFER 5 : 19200
-LOAD_TO_BUFER 8 : com_port
-TOE7761 opened..
+ file_nastr_reqiured 1: 19160496   CATCH   19160496 4294965293(-2003) 
+  Ошибка в Файле настроек  Refresh_list  19160496 
+but_stop_clickfilechooserbutton_pribor =0 
+filechooserbutton_pribor =0 
 
-DCBlength 28 
-BaudRate 19200 
-Mode 20625 
-wReserved 0 
-XonLim 2048 
-XoffLim 512 
-ByteSize 8 
-Parity 0 
-StopBits 0 
-XonChar 17 
-XoffChar 19 
-ErrorChar 0 
-EofChar 0 
-EvtChar 0 
-wReserved1 0 
-
-19200 
-
-DCBlength 28 
-BaudRate 19200 
-Mode 20625 
-wReserved 0 
-XonLim 2048 
-XoffLim 512 
-ByteSize 8 
-Parity 0 
-StopBits 0 
-XonChar 17 
-XoffChar 19 
-ErrorChar 0 
-EofChar 0 
-EvtChar 0 
-wReserved1 0 
- =interface data *IDN?
-  >start:  11  52  3 
-Файл генератора подключен 
-Запуск  генератора: 
-<    error:  TOE7761 not found. FIND:  
-INITIALIZATION  tabl_kalibr complite
- Include: .\prib\TOE7761/data.kal
- kalibrovka:  
-0  1.4000000e02  1.4000000e02  1.4000000e02 
-1  1.4000000e02  1.4000000e02  1.4000000e02 
-
- TOE7761  connect complite..
- Генератор НЕ обнаружен   
-  TOE7761 not found. FIND:  Сбой в в начальной настройке программы  stop:      11        52        17     
-  Работа завершена OUTP:STAT OFF
- OUTP:STAT OFF 
-word END - ok  
-
-WorkCicle STOP
- >Генератор НЕ обнаружен 
-stop:  11  52  17 
-Работа завершена<   BYE
+Exit 

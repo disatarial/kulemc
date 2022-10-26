@@ -547,7 +547,13 @@ UNTIL
 
 
 
- : file_nastr_reqiured work-info file_nastr_buf 1+ work-info  file_nastr_buf C@  	INCLUDE-PROBE   ;
+ : file_nastr_reqiured 
+."  file_nastr_reqiured 1: " .S
+  work-info file_nastr_buf 1+ work-info  file_nastr_buf C@  	 INCLUDE-PROBE  \ IF   THROW  -1 ELSE 0 THEN 
+DROP
+."  file_nastr_reqiured 2: " .S
+
+ ;
 
 
 VARIABLE num_data \ номер последних/текущих данных в списке  gtk_tree... только для передачи внутри граф. интерфейса
@@ -837,22 +843,35 @@ CALLBACK: button_save_data_metod_click
 	0 work-info  ERROR_PROG  !	\ сбраcываем ошибки
 	\ грузим имя настроек
 	filechooserbutton_file_nastr  @ 1 gtk_file_chooser_get_filename   DUP  ."  gtk_file_chooser_get_filename = " . CR
-	DUP  
+ 	DUP  
 	IF  
 		ASCIIZ> STR>S work-info  file_nastr_buf  LOAD_TO_BUFER  0
 	ELSE 
-		DROP "  Error: nastr not found "   error_metod_file :ERROR   
+	 	 DROP "  Файл настроек не найден  "   error_metod_file :ERROR  DROP  
 	THEN 
-	IF EXIT THEN
-\ грузим настройки
-	file_nastr_reqiured 
-	IF
-		" Error: load nastr problem  "   error_metod_file :ERROR      
-	THEN \ IF EXIT THEN
-	\  ." DEPTH=" DEPTH .   CR 
-	\ see CR
-	\ metod-info  Len_Coment_buffer @ metod-info Coment_buffer  textview_comment_bufer @ 3 gtk_text_buffer_set_text DROP
-	Refresh_list
+  	IF  \ EXIT THEN
+	ELSE
+	\ грузим настройки
+	  	['] file_nastr_reqiured  CATCH  
+ 		."   CATCH   " .S CR \ DROP
+\	work-info file_nastr_buf 1+ work-info  file_nastr_buf C@  	INCLUDE-PROBE 
+\	0
+		IF
+			"   Ошибка в Файле настроек  "   error_metod_file :ERROR  DROP     
+		ELSE
+\		 "   Ошибка в Файле настроек  "   error_metod_file :ERROR  DROP 
+			liststore_metod_text  @ 1 gtk_list_store_clear	 DROP
+		\ ."  load  ".S CR
+\			" Файл настроек загружен " vresult @ @  StoFile  vresult @ @  CRtoFile 
+		
+		THEN \ IF EXIT THEN
+		\  ." DEPTH=" DEPTH .   CR 
+		\ see CR
+		\ metod-info  Len_Coment_buffer @ metod-info Coment_buffer  textview_comment_bufer @ 3 gtk_text_buffer_set_text DROP
+ 	THEN
+	
+Refresh_list
+." Refresh_list  " .S CR
 	 0 ;  1 CELLS  
 CALLBACK: button_load_data_metod_click   
 
@@ -910,7 +929,7 @@ filechooserwidget_save  @ 1 gtk_file_chooser_get_filename  DUP  ."  filechooserw
 		DUP >R  STR@ DROP entry_save      @ 2 gtk_entry_set_text DROP R> STRFREE
 
 	ELSE 
-		DROP "  Error: nastr not found "   error_metod_file :ERROR   
+		DROP "  Error: nastr not found "   error_metod_file :ERROR DROP  
 	THEN 
 
 0  ;  1 CELLS  
