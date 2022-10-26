@@ -210,6 +210,7 @@ THEN
 
           I 1+ -> I
           fdata FREE DROP  \ освободили память из под данных файла
+	  f CLOSE-FILE
       THEN
     \ 1 \ fname[ lfname "" STR+ 
     \ " 2" DUP >R STR@ DROP 0 \  fdata 1 + fdata C@  

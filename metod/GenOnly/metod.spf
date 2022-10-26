@@ -557,7 +557,7 @@ DROP
 
 
 VARIABLE num_data \ номер последних/текущих данных в списке  gtk_tree... только для передачи внутри граф. интерфейса
-VARIABLE dialog
+VARIABLE dialog 
 \ VARIABLE dialog_file
 
 \ окно метода
@@ -565,6 +565,8 @@ VARIABLE builder_metod
 VARIABLE WinMetod
 VARIABLE button_close_metod
 VARIABLE WinMetod_timer \ для останова таймерра
+
+VARIABLE label_metod
 
 VARIABLE treeview_metod_data
 VARIABLE liststore_metod_text
@@ -751,9 +753,10 @@ CALLBACK: button_norma_click
 \ диалог ввода параметров кнопка отмены ввода
 :NONAME 	
 	dialog @  1 gtk_widget_hide DROP  
-	0 ;  1 CELLS  
+	1 ;  1 CELLS  
 CALLBACK: button_error_click
-
+\ диалог ввода параметров кнопка отмены ввода
+\ 
 
 :NONAME  
 \ .S
@@ -766,50 +769,84 @@ CALLBACK: button_error_click
 	  iter_store_text model 2 gtk_tree_model_get_string_from_iter    ASCIIZ> STR>S   \ STYPE ."  "
 	   S>FLOAT 
 	\ Временно 
-	 IF 
+ 	 IF 
 		F>D D>S  num_data ! \ запомнить номер строчки с данными
 		num_data @ SeeOne \ адрес данных,тип данных,  название данных   длинна названия
 		-> u -> adr  -> flag
 		adr u STR>S DUP >R  STR@ DROP dialog_label @ 2 gtk_label_set_text DROP R> STRFREE
 		flag 1 = 
 		IF 
+			dialog_entry 	 @  1 gtk_widget_show DROP
+			dialog_filechooserbutton @  1 gtk_widget_hide DROP 
+
 			@  >NUM  STR>S   
+			DUP >R  STR@ DROP dialog_entry    @ 2 gtk_entry_set_text DROP R> STRFREE
 		THEN	 \ целое
 		flag 2 = 
 		IF 
+			dialog_entry 	 @  1 gtk_widget_show DROP
+			dialog_filechooserbutton @  1 gtk_widget_hide DROP 
+
 			F@ >FNUM  STR>S  
+			DUP >R  STR@ DROP dialog_entry    @ 2 gtk_entry_set_text DROP R> STRFREE
+
 		THEN      \ действительное
 		flag 3 = 
 		IF 
+			dialog_entry 	dialog @  1 gtk_widget_show DROP
+			dialog_filechooserbutton @  1 gtk_widget_hide DROP 
+
 			DUP 1+ SWAP C@ STR>S  
+			DUP >R  STR@ DROP dialog_entry    @ 2 gtk_entry_set_text DROP R> STRFREE
 		THEN \ просто текст
 		flag 4 = 
 		IF  			\ имя файла калибровки
-			DUP 1+ SWAP C@ STR>S 
-			Directory \  ASCIIZ>  "" DUP -> tekFile  STR+   " /default.kal" tekFile  S+ tekFile   STR@ ." Directory   " TYPE CR 
-			tekFile    >R  R@ STR@  DROP dialog_filechooserbutton  @ 2 gtk_file_chooser_set_uri  R> STRFREE  ." dialog_filechooserbutton =" . CR 	
-			filefilter_kal @ dialog_filechooserbutton   @ 2 gtk_file_chooser_add_filter DROP
-			\	 DUP STR@ DROP dialog_filechooserbutton @ 2 gtk_file_chooser_set_filename DROP    
+			dialog_entry 	 @  1 gtk_widget_hide DROP
+			dialog_filechooserbutton @  1 gtk_widget_show DROP 
+
+			DUP 1+ SWAP C@ STR>S  CR ." file = " DUP STR@ TYPE CR
+			DUP STR@ NIP 0 >
+			IF  
+				-> tekFile   
+			ELSE \ пустая строка
+				Directory   ASCIIZ>  "" DUP -> tekFile  STR+  \ " /default.kal" tekFile  S+ 
+				tekFile   STR@ ." Directory   " TYPE CR DROP 
+			THEN
+			  tekFile    >R  R@ STR@  DROP dialog_filechooserbutton  @ 2 gtk_file_chooser_set_current_folder  R> STRFREE  ." dialog_filechooserbutton =" . CR 	
+			  filefilter_kal @ dialog_filechooserbutton   @ 2 gtk_file_chooser_add_filter DROP
+			\  DUP STR@ DROP dialog_filechooserbutton @ 2 gtk_file_chooser_set_filename DROP    
 		
 		THEN
 		flag 5 = 
 		IF  			\ имя файла прибора
-			DUP 1+ SWAP C@ STR>S 
-			" ./prib" -> tekFile    " /default.prib" tekFile  S+ tekFile   STR@ ." Directory   " TYPE CR 
+			dialog_entry 	 @  1 gtk_widget_hide DROP
+			dialog_filechooserbutton @  1 gtk_widget_show DROP 
+
+			DUP 1+ SWAP C@ STR>S  CR ." file = " DUP STR@ TYPE CR
+			DUP STR@ NIP 0 >
+			IF  
+				-> tekFile   
+			ELSE \ пустая строка
+\				Directory   ASCIIZ>  "" DUP -> tekFile  STR+  \ " /default.kal" tekFile  S+ 
+			" ./prib" -> tekFile
+				tekFile   STR@ ." Directory   " TYPE CR DROP 
+			THEN
+	\		DUP 1+ SWAP C@ STR>S 
+\			" ./prib" -> tekFile    " /default.prib" tekFile  S+ tekFile   STR@ ." Directory   " TYPE CR 
 			tekFile    >R  R@ STR@  DROP dialog_filechooserbutton  @ 2 gtk_file_chooser_set_uri  R> STRFREE  ." dialog_filechooserbutton =" . CR 	
 			filefilter_prib @ dialog_filechooserbutton   @ 2 gtk_file_chooser_add_filter DROP
-			\	 DUP STR@ DROP dialog_filechooserbutton @ 2 gtk_file_chooser_set_filename DROP    
+			\ DUP STR@ DROP dialog_filechooserbutton @ 2 gtk_file_chooser_set_filename DROP    
 		THEN
 		flag 6 = 
 		IF 
 			F@    >FNUM  STR>S  
+			DUP >R  STR@ DROP dialog_entry    @ 2 gtk_entry_set_text DROP R> STRFREE	
 		THEN      \ частота 
 
 		flag 6 > flag 1 < OR 
 		IF 
 			" ОШИБКА " 
 		THEN
-		DUP >R  STR@ DROP dialog_entry    @ 2 gtk_entry_set_text DROP R> STRFREE
 	THEN
 	column path tree_view 0 ; 3 CELLS 
 CALLBACK:  TreeView_start_metod_click
@@ -1035,12 +1072,14 @@ CALLBACK: but_pause_click
 
 
 
-: StartMetod  {   \ tekFile }
+: StartMetod  {   \ tekFile fdata f }
 	Directory 2 + ASCIIZ>  "" DUP -> tekFile  STR+
 	" /metod.glade" tekFile  S+
 	." load glade file :" tekFile     STR@ TYPE ."  " CR
 	0 gtk_builder_new   builder_metod !
 	error  tekFile   >R R@ STR@  DROP  builder_metod @ 3 gtk_builder_add_from_file DROP   R> STRFREE \ 2DROP 
+	tekFile STRFREE
+
 	" winmetod"  >R R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object WinMetod !  R> STRFREE \ 2DROP
 	WinMetod @  1 gtk_widget_show DROP \ DROP
 	\ ДЕЙСТВО ЗАКРЫТИЕ ПРОГРАММЫ
@@ -1053,7 +1092,25 @@ CALLBACK: but_pause_click
 
 	" filefilter_kal" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object  filefilter_kal  !    R> STRFREE
 
- 
+	" label_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object label_metod !    R> STRFREE \ 2DROP
+
+ 	Directory   ASCIIZ>  "" DUP -> tekFile  STR+   " /info.txt" tekFile  S+ \ tekFile   
+
+     \ прочитать из файла описание метода
+  \      tekFile STR@  R/O OPEN-FILE     .
+    (   0= IF -> f
+          1024 1 + ALLOCATE THROW -> fdata 
+          fdata CELL + 1020  f READ-FILE THROW fdata  !
+          fdata CELL + fdata @  TYPE CR
+	  
+\	  fdata CELL + fdata @   STR>S   >R  STR@ DROP label_metod @ 2 gtk_label_set_text DROP R> STRFREE
+	fdata FREE DROP 
+)
+\	f CLOSE-FILE
+
+\	THEN
+\	tekFile STRFREE
+
 	\ кнопка сохранить настройки
 	" button_save_data_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object button_save_data_metod !    R> STRFREE \ 2DROP
 	" clicked"  >R 0 0 0  ['] button_save_data_metod_click   R@ STR@ DROP button_save_data_metod  @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
@@ -1102,14 +1159,17 @@ CALLBACK: but_pause_click
 
 	\ поднятие диалога выбора  вот тут проблемма что если удалять и включать. то  втором и последующих включениях появляетя голое окно без кнопочек.
 	 " dialog_label" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object dialog_label !    R> STRFREE \ изменяемая надпись
-	
 	 " dialog"  DUP >R STR@  DROP builder_metod @ 2 gtk_builder_get_object  dialog !  R> STRFREE \ 2DROP
+	 " delete_event"  >R 0 0 0  ['] button_error_click    R@ STR@ DROP dialog @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 	 " button_norma" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object button_norma !    R> STRFREE \ 2DROP
 	 " clicked"  >R 0 0 0  ['] button_norma_click   R@ STR@ DROP button_norma @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 	 " button_error" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object button_error !    R> STRFREE \ 2DROP
 	 " clicked"  >R 0 0 0  ['] button_error_click   R@ STR@ DROP button_error @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
+
 	 " dialog_entry" >R  R@ STR@  DROP builder_metod  @ 2 gtk_builder_get_object dialog_entry !    R> STRFREE \ 2DROP
 	 " dialog_filechooserbutton"  >R  R@ STR@  DROP builder_metod   @  2 gtk_builder_get_object dialog_filechooserbutton !    R> STRFREE \ 2DROP
+
+
 	 dialog @  1 gtk_widget_hide DROP 
 
 	1 WinMetod_timer !
