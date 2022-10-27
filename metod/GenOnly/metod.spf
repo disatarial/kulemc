@@ -97,7 +97,6 @@ DUP here CELL +  ! \  -> here
 
 : Create_sysup-metod-info { \   adr u  here  info }
 HERE  DUP -> here TO sysup-metod-info  
-here S" Каталога метода"					4 256		Add_sysup-metod-info TO  vfile_nastr_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Пауза между воздействиями, мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_PAUSE		HERE here :save_next_sysup-metod-info -> here
 here S" Время воздействия ,  мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_TIME		HERE here :save_next_sysup-metod-info -> here
 here S" Частота начальная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_BEGIN		HERE here :save_next_sysup-metod-info -> here
@@ -105,14 +104,14 @@ here S" Частота конечная, Гц"					2 1 FLOATS	Add_sysup-metod-in
 here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_STEP		HERE here :save_next_sysup-metod-info -> here
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
 here S" Файл калибровки"					4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
-\ here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
 here S" Файл генератора"					5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
+here S" Текущий уровень генератора"				2 1 CELLS	Add_sysup-metod-info TO vLevGen		  HERE here :save_next_sysup-metod-info -> here 
 here S" Файл результата"					3 256		Add_sysup-metod-info TO  vfile_result		HERE here :save_next_sysup-metod-info -> here
 here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
 here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
 here S" файл результата"					1 1 CELLS	Add_sysup-metod-info TO vresult			HERE here :save_next_sysup-metod-info -> here 
-here S" Текущий уровень генератора"				2 1 CELLS	Add_sysup-metod-info TO vLevGen		\ HERE here :save_next_sysup-metod-info -> here 
+here S" Каталога метода"					4 256		Add_sysup-metod-info TO  vfile_nastr_buf	\ HERE here :save_next_sysup-metod-info -> here
 ;
 
 
@@ -514,18 +513,18 @@ UNTIL
  	work_Execute work-info -upravl_thead- !
 	[']  BEGIN: CATCH  
 	IF \ CR  ." word BEGIN problem  " CR error_begin_problem work-info  ERROR_PROG !
-		" Сбой в в начальной настройке программы "  error_cicle_problem  :ERROR  DROP
+		"  Сбой в в начальной настройке программы "  error_cicle_problem  :ERROR  DROP
 	ELSE \ если инициализация прошла 
 		CR ." word BEGIN  - ok  " CR
 		['] WorkSteps CATCH  
 		IF   
-			" Сбой в работе  цикла программы "  error_cicle_problem  :ERROR  DROP
+			"  Сбой в работе  цикла программы "  error_cicle_problem  :ERROR  DROP
 			\	  error_cicle_problem work-info  ERROR_PROG ! 
 		ELSE  CR ." word WorkCicle -ok  "  CR THEN
 	THEN	
 	['] END:  CATCH 	
 	IF  \ CR ." word END problem. "  CR error_end_problem work-info  ERROR_PROG ! 
-		" Сбой в отключении оборудования"  error_end_problem  :ERROR  DROP
+		"  Сбой в отключении оборудования"  error_end_problem  :ERROR  DROP
 	ELSE  CR ." word END - ok  " CR 
 	THEN	
 	\ metod-info result @ outFileClose
@@ -1078,8 +1077,7 @@ CALLBACK: but_pause_click
 	." load glade file :" tekFile     STR@ TYPE ."  " CR
 	0 gtk_builder_new   builder_metod !
 	error  tekFile   >R R@ STR@  DROP  builder_metod @ 3 gtk_builder_add_from_file DROP   R> STRFREE \ 2DROP 
-	tekFile STRFREE
-
+ 
 	" winmetod"  >R R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object WinMetod !  R> STRFREE \ 2DROP
 	WinMetod @  1 gtk_widget_show DROP \ DROP
 	\ ДЕЙСТВО ЗАКРЫТИЕ ПРОГРАММЫ
@@ -1093,24 +1091,7 @@ CALLBACK: but_pause_click
 	" filefilter_kal" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object  filefilter_kal  !    R> STRFREE
 
 	" label_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object label_metod !    R> STRFREE \ 2DROP
-
- 	Directory   ASCIIZ>  "" DUP -> tekFile  STR+   " /info.txt" tekFile  S+ \ tekFile   
-
-     \ прочитать из файла описание метода
-  \      tekFile STR@  R/O OPEN-FILE     .
-    (   0= IF -> f
-          1024 1 + ALLOCATE THROW -> fdata 
-          fdata CELL + 1020  f READ-FILE THROW fdata  !
-          fdata CELL + fdata @  TYPE CR
-	  
-\	  fdata CELL + fdata @   STR>S   >R  STR@ DROP label_metod @ 2 gtk_label_set_text DROP R> STRFREE
-	fdata FREE DROP 
-)
-\	f CLOSE-FILE
-
-\	THEN
-\	tekFile STRFREE
-
+ 
 	\ кнопка сохранить настройки
 	" button_save_data_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object button_save_data_metod !    R> STRFREE \ 2DROP
 	" clicked"  >R 0 0 0  ['] button_save_data_metod_click   R@ STR@ DROP button_save_data_metod  @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
