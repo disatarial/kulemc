@@ -3,7 +3,6 @@
 Воздействия необходим уровнем с предварительной калибровкой в заданных границах. 
 Сигнал "восстанавливается" по запомненному значению  генератора.
 load grafic file :./metod/GenOnly/bildo.png 
-load grafic file :./metod/GenOnly/bildo.png 
 button_load_metod_click
 load metod file :./metod/GenOnly/metod.spf 
 StoFile isn't unique (./metod/GenOnly/metod.spf)
@@ -15,6 +14,14 @@ timer_ticket isn't unique (./metod/GenOnly/metod.spf)
 load glade file :metod/GenOnly/metod.glade 
 gtk_file_chooser_set_uri =1 
 TreeView_start_metod_click
+TreeView_start_metod_click
+
+file = 
+Directory   ./metod/GenOnly
+dialog_filechooserbutton =1 
+filechooserbutton_pribor =1 
+filechooserbutton_pribor =1 
+filechooserbutton_pribor =1 
 but_stop_clickfilechooserbutton_pribor =0 
 filechooserbutton_pribor =0 
 
