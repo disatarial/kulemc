@@ -1,7 +1,7 @@
 
- REQUIRE  tabl_kalibr  ~disa/kalibr_hype.f
- REQUIRE  dBuV->V  ~disa/algoritm.f
- REQUIRE WildCMP-U ~pinka/lib/mask.f
+\ REQUIRE  tabl_kalibr  ~disa/kalibr_hype.f
+\ REQUIRE  dBuV->V  ~disa/algoritm.f
+\ REQUIRE WildCMP-U ~pinka/lib/mask.f
 
 
  
@@ -52,12 +52,10 @@ CONSTANT sysup-work-info
 0 VALUE vwork_step
 0 VALUE vfile_kalibrov_buf
 0 VALUE vfile_generator_buf
-0 VALUE vfile_nastr_buf
 0 VALUE vresult 
  
 \ 0 VALUE vComent_buffer	\ буфер  для коментария настроек
 0 VALUE vFREQ			\ текущая частота
-0 VALUE vfile_result			\ файла результата
 
 0 VALUE vgenerator
 0 VALUE vkalibrovka
@@ -97,22 +95,20 @@ DUP here CELL +  ! \  -> here
 
 : Create_sysup-metod-info { \   adr u  here  info }
 HERE  DUP -> here TO sysup-metod-info  
-here S" Каталога метода"					4 256		Add_sysup-metod-info TO  vfile_nastr_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Пауза между воздействиями, мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_PAUSE		HERE here :save_next_sysup-metod-info -> here
 here S" Время воздействия ,  мс"				1 1 CELLS	Add_sysup-metod-info TO  vSTEP_TIME		HERE here :save_next_sysup-metod-info -> here
 here S" Частота начальная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_BEGIN		HERE here :save_next_sysup-metod-info -> here
 here S" Частота конечная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_END		HERE here :save_next_sysup-metod-info -> here
 here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_STEP		HERE here :save_next_sysup-metod-info -> here
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
-here S" Файл калибровки"					4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
-\ here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
-here S" Файл генератора"					5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл калибровки"						4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
+here S" Файл генератора"						5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
-here S" Файл результата"					3 256		Add_sysup-metod-info TO  vfile_result		HERE here :save_next_sysup-metod-info -> here
+here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_next_sysup-metod-info -> here 
 here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
 here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
-here S" файл результата"					1 1 CELLS	Add_sysup-metod-info TO vresult			HERE here :save_next_sysup-metod-info -> here 
-here S" Текущий уровень генератора"				2 1 CELLS	Add_sysup-metod-info TO vLevGen		\ HERE here :save_next_sysup-metod-info -> here 
+here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\	HERE here :save_next_sysup-metod-info -> here 
 ;
 
 
@@ -416,10 +412,11 @@ UNTIL
 ; 
 
 : WORK:     || F: gen F: kal  D: n_step   ||
+	."  work.... "
 	 \ уcтанавливаем частоту
 	vFREQ @  F@    vgenerator	@ @ ^ SetFreq  
-        vFREQ  @ F@ 2 vkalibrovka @ @ ^ TakeData  gen F!  \ начальные данные генератора
- 	gen F@ vLevGen @ F!
+       vFREQ  @ F@ 2 vkalibrovka @ @ ^ TakeData  gen F!  \ начальные данные генератора
+ 	  gen F@  vLevGen @ F!
 \ частота
 	 vFREQ @ F@   vresult @ @ FtoFile  
 	"               "  vresult @ @  StoFile
@@ -434,6 +431,7 @@ UNTIL
 	TIME&DATE  DROP DROP DROP vresult @ @ DtoFile  vresult @ @ DtoFile  vresult @ @ DtoFile 
 		
 	vresult @ @  CRtoFile  
+\ )
 	."  ...work "
 	CR
 ; 
@@ -491,9 +489,9 @@ UNTIL
 		THEN     
 	WHILE
 		\ рабочий цикл
-		WORK:  
+		 WORK:   
 		\ вычисляем и запоминаем новый шаг (новую частоту?) 
-		NewStep  \ work-info  FREQ  F!
+		 NewStep    \ work-info  FREQ  F!
 	  	vSTEP_PAUSE @ @ PAUSE-PROG  
 	REPEAT
 		\ "последний" шаг

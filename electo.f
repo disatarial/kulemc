@@ -12,7 +12,7 @@ STARTLOG
  REQUIRE F. ~disa\dopoln.f
  REQUIRE socket_port ~disa/socket.f
  REQUIRE com_port ~disa/COMM.F
-  
+
   
 : LOAD_TO_BUFER { s-adr adr \ u   -- }
 s-adr STR@  ." LOAD_TO_BUFER "  DUP . ." : " TYPE CR

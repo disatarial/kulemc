@@ -1,16 +1,14 @@
 COMMENT( )
- " C:\prog\SP-Forth\emctest\metod\test\default.kal   "   0 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Каталога метода
- "  1000 " S>FLOAT DROP F>D DROP  1 SeeOne  2DROP DROP !  \ Пауза между воздействиями, мс
- "  1000 " S>FLOAT DROP F>D DROP  2 SeeOne  2DROP DROP !  \ Время воздействия ,  мс
- "  1.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
- "  1.0000000e07 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
- "  1.0000000e06 " S>FLOAT DROP  5 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
- "  0 " S>FLOAT DROP F>D DROP  6 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
- " C:\progs\SPForth\kulemc\metod\GenOnly\1.kal "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ "  1000 " S>FLOAT DROP F>D DROP  0 SeeOne  2DROP DROP !  \ Пауза между воздействиями, мс
+ "  1000 " S>FLOAT DROP F>D DROP  1 SeeOne  2DROP DROP !  \ Время воздействия ,  мс
+ "  1.0000000e06 " S>FLOAT DROP  2 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
+ "  3.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
+ "  1.0000000e06 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
+ "  0 " S>FLOAT DROP F>D DROP  5 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
+ " C:\progs\SPForth\kulemc\metod\GenOnly\1.kal "   6 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ "  0.0000000e00 " S>FLOAT DROP  7 SeeOne  2DROP DROP F!  \ Корректировка калибровки
  " C:\progs\SPForth\kulemc\prib\default\pribor.prib "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
- "  1.0000000e06 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
- "                     "   10 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл результата
- "  117309516 " S>FLOAT DROP F>D DROP  11 SeeOne  2DROP DROP !  \ Объект генератор
- "  118384844 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ Объект калибровка
- "  944 " S>FLOAT DROP F>D DROP  13 SeeOne  2DROP DROP !  \ файл результата
- "  2.0000000e01 " S>FLOAT DROP  14 SeeOne  2DROP DROP F!  \ Текущий уровень генератора
+ "  0.0000000e00 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
+ "  5.3736810e-307 " S>FLOAT DROP  10 SeeOne  2DROP DROP F!  \ Объект генератор
+ "  0 " S>FLOAT DROP F>D DROP  11 SeeOne  2DROP DROP !  \ Объект калибровка
+ "  0 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ файл результата
