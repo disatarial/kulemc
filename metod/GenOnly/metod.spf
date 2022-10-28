@@ -1076,7 +1076,6 @@ CALLBACK: but_pause_click
 	." load glade file :" tekFile     STR@ TYPE ."  " CR
 	0 gtk_builder_new   builder_metod !
 	error  tekFile   >R R@ STR@  DROP  builder_metod @ 3 gtk_builder_add_from_file DROP   R> STRFREE \ 2DROP 
-	tekFile STRFREE
 
 	" winmetod"  >R R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object WinMetod !  R> STRFREE \ 2DROP
 	WinMetod @  1 gtk_widget_show DROP \ DROP
@@ -1091,23 +1090,6 @@ CALLBACK: but_pause_click
 	" filefilter_kal" >R  R@ STR@  DROP builder_metod @ 2 gtk_builder_get_object  filefilter_kal  !    R> STRFREE
 
 	" label_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object label_metod !    R> STRFREE \ 2DROP
-
- 	Directory   ASCIIZ>  "" DUP -> tekFile  STR+   " /info.txt" tekFile  S+ \ tekFile   
-
-     \ прочитать из файла описание метода
-  \      tekFile STR@  R/O OPEN-FILE     .
-    (   0= IF -> f
-          1024 1 + ALLOCATE THROW -> fdata 
-          fdata CELL + 1020  f READ-FILE THROW fdata  !
-          fdata CELL + fdata @  TYPE CR
-	  
-\	  fdata CELL + fdata @   STR>S   >R  STR@ DROP label_metod @ 2 gtk_label_set_text DROP R> STRFREE
-	fdata FREE DROP 
-)
-\	f CLOSE-FILE
-
-\	THEN
-\	tekFile STRFREE
 
 	\ кнопка сохранить настройки
 	" button_save_data_metod" >R  R@ STR@  DROP builder_metod @  2 gtk_builder_get_object button_save_data_metod !    R> STRFREE \ 2DROP
@@ -1195,7 +1177,7 @@ CALLBACK: but_pause_click
 	 " file-activated"  >R 0 0 0  ['] filechooserwidget_save_activated   R@ STR@ DROP filechooserwidget_save @ 6 g_signal_connect_data   R> STRFREE  DROP \ 2DROP 2DROP 2DROP
 \ filechooserwidget_save
 
-
+\ )
 ;
 
 
