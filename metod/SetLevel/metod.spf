@@ -52,16 +52,21 @@ CONSTANT sysup-work-info
 0 VALUE vwork_step
 0 VALUE vfile_kalibrov_buf
 0 VALUE vfile_generator_buf
+0 VALUE vfile_izmeritel_buf
 0 VALUE vresult 
  
 \ 0 VALUE vComent_buffer	\ буфер  для коментария настроек
 0 VALUE vFREQ			\ текущая частота
 
 0 VALUE vgenerator
+0 VALUE vizmeritel
 0 VALUE vkalibrovka
 0 VALUE  vfile_kalibrov_korrect
 0 VALUE  vLevGen
-
+0 VALUE vTochnost
+0 VALUE vprev_gen 
+0 VALUE vGenMaxStep
+0 VALUE vGenMax
 0 VALUE sysup-metod-info  \ структура
 
 \ изменяемые "вручную" значения
@@ -103,11 +108,18 @@ here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
 here S" Файл калибровки"						4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
+here S" Точность калибровки, дБ"				2 1 FLOATS	Add_sysup-metod-info TO  vTochnost		HERE here :save_next_sysup-metod-info -> here 
+here S" Наибольший шаг генератора, дБ"				2 1 FLOATS	Add_sysup-metod-info TO  vGenMaxStep		HERE here :save_next_sysup-metod-info -> here 
+here S" Наибольший значение генератора, дБ"			2 1 FLOATS	Add_sysup-metod-info TO  vGenMax		HERE here :save_next_sysup-metod-info -> here 
 here S" Файл генератора"						5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл измерителя"						5 256		Add_sysup-metod-info TO  vfile_izmeritel_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
 here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_next_sysup-metod-info -> here 
 here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
+here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vizmeritel		HERE here :save_next_sysup-metod-info -> here
 here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
+here S" Предыдущее значение генератора, дБ"			2 1 FLOATS	Add_sysup-metod-info TO  vprev_gen		HERE here :save_next_sysup-metod-info -> here 
+
 here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\	HERE here :save_next_sysup-metod-info -> here 
 ;
 
@@ -344,38 +356,56 @@ UNTIL
 	\ результаты	подготовили файл
 	" .\result\result.txt"   outFileCreate vresult @ !
 	" start: " vresult @ @ StoFile TIME&DATE  DROP DROP DROP vresult @ @ DtoFile  vresult @ @ DtoFile  vresult @ @ DtoFile   vresult @  @  CRtoFile  
-
-\ S"   01 " TYPE  .S CR 
-\	see
-\	."  include file_generator  " CR	   
+   
 	vfile_generator_buf @ DUP 1+ SWAP  C@   INCLUDE-PROBE 	
 	IF " Файл генератора НЕ подключен " vresult @ @  StoFile  vresult @ @  CRtoFile error_out_file  work-info  ." file generator error "  ERROR_PROG ! -1 THROW 	
 	ELSE     " Файл генератора подключен " vresult @ @  StoFile  vresult @ @  CRtoFile  ." file generator complite " 
 	THEN
-	
-\ 	CR ." stack = " .S CR
-\	CURRENT @ @ COUNT  SFIND DROP	  
- \ CR CR ."  CURRENT @ @ = " 	 . DUP  ."  name = " 	 .  CR CR
+
 	 NewObj vgenerator @ !
 	
 	" Запуск  генератора: " vresult @ @  StoFile  vresult @ @  CRtoFile  
-\	500 PAUSE
-\ запуск устройств	
-\	."  start...   " CR	    
 	 vfile_generator_buf	@  vgenerator @	@ ^ Start 
 	 IF " Генератор НЕ обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile  error_out_file  work-info  ERROR_PROG ! -1 THROW 
 	 ELSE   " Генератор обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile THEN
-\	."  ...start  " CR	    
  
-	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
+ 	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
 	IF "  Минимальное  значение не соответствует генератору. Поправлено. {CRLF} " vresult @ @  StoFile  vresult @ @  CRtoFile
 	THEN 
 
-	 vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
-	 IF \ " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
+	vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
+	IF \ " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
 		"  Максимальное значение не соответствует генератору. Поправлено. " vresult @ @  StoFile  vresult @ @  CRtoFile
 	THEN
-			\  IF " максимальное значение не соответствует генератору. Поправлено. {CRLF}"  vresult @ @  StoFile THEN 
+
+ 
+
+
+	vfile_izmeritel_buf @ DUP 1+ SWAP  C@   INCLUDE-PROBE 	
+	IF " Файл измерителя НЕ подключен " vresult @ @  StoFile  vresult @ @  CRtoFile error_out_file  work-info  ." file izmeritel error "  ERROR_PROG ! -1 THROW 	
+	ELSE     " Файл измерителя подключен " vresult @ @  StoFile  vresult @ @  CRtoFile  ." file izmeritel complite " 
+	THEN
+DUP IF 
+	 NewObj 
+ELSE  
+vgenerator @ @
+THEN
+	 vizmeritel @ !	
+	" Запуск  измерителя: " vresult @ @  StoFile  vresult @ @  CRtoFile  
+	 vfile_izmeritel_buf	@  vizmeritel @	@ ^ Start 
+	 IF " Измеритель НЕ обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile  error_out_file  work-info  ERROR_PROG ! -1 THROW 
+	 ELSE   " Измеритель обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile THEN
+
+ 	vFREQ_BEGIN @ F@ vizmeritel @ @ ^ MinMax vFREQ_BEGIN @ F! 
+	IF "  Минимальное  значение не соответствует генератору. Поправлено. {CRLF} " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN 
+
+	vFREQ_END @   F@ vizmeritel @ @ ^ MinMax vFREQ_END   @ F!  
+	IF \ " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
+		"  Максимальное значение не соответствует генератору. Поправлено. " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN
+
+
 
 	."  kalibrovka " CR	    
 \ создали объект-основу калибровки
@@ -394,9 +424,9 @@ UNTIL
 		THEN CR
 
 	\ устанавливаем мин и макс по калибровке, если они не соответствуют ей
-\	vFREQ_BEGIN @ F@  vkalibrovka  @ @ ^ MinMax vFREQ_BEGIN @ F! IF " минимальное  значение не соответствует калибровке. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
-\	vFREQ_END @  F@  vkalibrovka  @ @ ^ MinMax vFREQ_END @  F! IF " максимальное значение не соответствует калибровке. Поправлено. {CRLF}" vresult @ @  StoFile THEN
-\	vFREQ_BEGIN @ F@ vFREQ @ F!  
+	vFREQ_BEGIN @ F@  vkalibrovka  @ @ ^ MinMax vFREQ_BEGIN @ F! IF "  Минимальное  значение не соответствует калибровке. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
+	vFREQ_END @  F@  vkalibrovka  @ @ ^ MinMax vFREQ_END @  F! IF "  Максимальное значение не соответствует калибровке. Поправлено. {CRLF}" vresult @ @  StoFile THEN
+	vFREQ_BEGIN @ F@ vFREQ @ F!  
 	
 	vFREQ_STEP @ F@ 0e F>
 	IF \ едем вверх
@@ -404,43 +434,105 @@ UNTIL
 	ELSE \ едем вниз
 	  vFREQ_END @ F@ vFREQ @ F!  
 	THEN
-	" Частота,                ПОДАНО       "  vresult @ @ StoFile  vresult @ @ CRtoFile 
+	 vFREQ @ F@ 2 vkalibrovka @ @ ^ TakeData  vprev_gen @ F! \ первое значение 
+	
+	" Частота,                ПОДАНО, дБ        ИЗМЕРЕНО    КАЛИБРОВКА "  vresult @ @ StoFile  vresult @ @ CRtoFile 
 	." begin-ok"
 
 ; 
 
-: WORK:     || F: gen F: kal  D: n_step   ||
-	."  work.... "
+: WORK:     || F: gen F: kal  D: n_step   F: povtor ||
+         ."  work.... "
 	 \ уcтанавливаем частоту
 	vFREQ @  F@    vgenerator	@ @ ^ SetFreq  
-	
-	
-        vFREQ  @ F@ 2 vkalibrovka @ @ ^ TakeData  gen F!  \ начальные данные генератора
+	vFREQ @  F@    vizmeritel	@ @ ^ SetFreq  
+
+        vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData \  gen F!  \ начальные данные генератора
+	vTochnost @ F@  2e F* F+ 
+	Data_nach_formula Data_Kalib F!   \ что требуется выставить в результате
+
+	 vFREQ @ F@ 2 vkalibrovka @ @ ^ TakeData 
+	vprev_gen @ F@ 6e F-  FMAX  \  выбираем максимальное из предложенного.. < из таблицы или на 20% меньше предыдущего> 
+ gen F! 
  	  gen F@  vLevGen @ F!
+
+
 \ частота
 	 vFREQ @ F@   vresult @ @ FtoFile  
 	"               "  vresult @ @  StoFile
+
+ BEGIN 
+\ work-info -upravl_thead- 0 = 
+work_Execute work-info -upravl_thead- @ =
+    IF 
+	n_step @ 1 + n_step  !
+	 \ устанавливаем уровни
+		gen F@  vgenerator @ @ ^ SetLevel  \  выставляем данные генератора
+	 200 PAUSE-PROG 
+\ FDEPTH .
+	 \ измеряем уровни калибровочного сигнала
+	 vizmeritel  @ @ ^ GetLevel  
+	 \ уровеь есть
+\ DUP .  FDUP F.  CR
+ \	 . F.
+	1 = \ должно быть только 1 значение
+	IF
+	\ набор данных для формулы
+						Data_nach_formula Sign_Izmer F! 
+		gen  F@				Data_nach_formula Sig_Gener  F!
+		vGenMaxStep @  F@		Data_nach_formula setsGenMaxStep F!
+		vGenMax	@ F@			Data_nach_formula setsGenMax F!
+		\ Вычисление требуемой мощности
+		Data_nach_formula Vyhod_Na_Amplitudu
+		Data_nach_formula ResultGen F@  
+		
+  FDUP CR F. CR
+		gen  F!   gen F@  vLevGen @ F!
+		\ ограничение генератора
+		gen  F@  vgenerator @ @ ^ SetLevel      
+		300 PAUSE-PROG	 	
+		vizmeritel @  @ ^  GetLevel \    прочитать уровень с учетом калибровочных данных, кои забиты в измеритель   
+		IF
+			kal F!
+		THEN
+	ELSE
+		-100 n_step !  \ не требуется установка по мощности  
+	THEN
+     300 PAUSE-PROG
+  ELSE -100 n_step !  THEN
+ kal  F@  vFREQ  @ F@ 1  vkalibrovka @ @ ^ TakeData   vTochnost @ F@ F+  F- FABS  vTochnost @ F@ F<	 \ полученное значение больше  необходимого  но меньше него + точность
+\  n_step @  ABS metod-info	N_STEP		@  >   OR   \ кончилось количество шагов 
+ work_Execute work-info -upravl_thead- @ <> OR
+  gen F@  povtor F@ F- FABS  0.01e F<   OR  \ уперлись в ограничитель 
+ gen F@  povtor F! \ запомнили предыдущее
+ UNTIL  
 
 	gen F@  vgenerator @ @ ^ SetLevel  \  выставляем данные генератора
 	vSTEP_TIME @ @ PAUSE-PROG
 	 gen  F@   vresult @ @ FtoFile  
 	"    "  vresult @ @  StoFile
 
-
-
-
-
-
-
-
-
-
+	vizmeritel	@ @ ^ GetLevel
+	DUP 0 > 
+	IF 0 
+		DO vresult @ @  FtoFile LOOP 
+		"    "  vresult @ @  StoFile
+	ELSE DROP 
+	THEN
+	
 \  калибровочные данные
 	\ metod-info kalibr_izm	@ ^ GetLevel  DUP 0 >   IF   0 DO   metod-info result @ FtoFile  LOOP ELSE DROP    THEN
-	 "    "  vresult @ @  StoFile  
+	vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData  vresult @ @  FtoFile
+ 
+ 	 "    "  vresult @ @  StoFile  		
+	n_step @ vresult @ @ DtoFile  
+
+ 	 "    "  vresult @ @  StoFile  
 	TIME&DATE  DROP DROP DROP vresult @ @ DtoFile  vresult @ @ DtoFile  vresult @ @ DtoFile 
-		
-	vresult @ @  CRtoFile  
+
+ 	vresult @ @  CRtoFile  
+
+
 \ )
 	."  ...work "
 	CR
@@ -460,6 +552,10 @@ UNTIL
 \ удаление оборудования 	
 	vgenerator @	@  FreeObj
 	\ metod-info kalibr_izm	@  FreeObj
+
+	vizmeritel @ @   vgenerator @	@   =  0=   \ если это не один прибор
+	IF vizmeritel @	@  FreeObj THEN
+
 \ удаление таблиц	
 \	vkalibrovka  @ @   FreeObj
 	; 
@@ -593,6 +689,7 @@ VARIABLE  button_stop
 VARIABLE  button_pause
 VARIABLE  textview_result 
 VARIABLE  textview_result_bufer 
+
 VARIABLE  checkbuttonScrool
 
 	 
@@ -1028,11 +1125,11 @@ CALLBACK: filechooserwidget_save_activated
 	THEN	
 
 	textview_result_bufer @  1 gtk_text_buffer_get_insert -> s
-	
 	checkbuttonScrool  @  1 gtk_toggle_button_get_active 
 	IF	
 		0 0 0 0 s textview_result @ 6 gtk_text_view_scroll_to_mark DROP
 	THEN	
+	
 	filechooserbutton_file_nastr  @   1 gtk_file_chooser_get_current_folder DUP 
 	0<> 
 	IF 
@@ -1165,10 +1262,7 @@ CALLBACK: but_pause_click
 	 " checkbuttonScrool" >R  R@ STR@  DROP builder_metod  @ 2 gtk_builder_get_object checkbuttonScrool !    R> STRFREE \ 2DROP 
 
 
-
 	 dialog @  1 gtk_widget_hide DROP 
-
-
 
 	1 WinMetod_timer !
 	 0 ['] timer_ticket  1000 3 g_timeout_add DROP

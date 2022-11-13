@@ -5,10 +5,10 @@ COMMENT( )
  "  3.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
  "  1.0000000e06 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
  "  0 " S>FLOAT DROP F>D DROP  5 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
- " C:\progs\SPForth\kulemc\metod\GenOnly\1.kal   "   6 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ " C:\progs\SPForth\kulemc\metod\SimpleACH\1.kal "   6 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
  "  0.0000000e00 " S>FLOAT DROP  7 SeeOne  2DROP DROP F!  \ Корректировка калибровки
- " C:\progs\SPForth\kulemc\prib\default\pribor.prib   "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
- " C:\progs\SPForth\kulemc\prib\default\pribor.prib "   9 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
+ " C:\progs\SPForth\kulemc\prib\default\pribor.prib     "   8 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
+ " C:\progs\SPForth\kulemc\prib\default\povtor.prib  "   9 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
  "  5.3736810e-307 " S>FLOAT DROP  10 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
  "  0.0000000e00 " S>FLOAT DROP  11 SeeOne  2DROP DROP F!  \ Текущий уровень генератора
  "  0 " S>FLOAT DROP F>D DROP  12 SeeOne  2DROP DROP !  \ Объект генератор

@@ -1,0 +1,4 @@
+ " *TOE*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " .\interface\COMPORT.interface" PriborPassport_info interface	LOAD_TO_BUFER 
+ " COM1" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ " 19200" PriborPassport_info interface_data2	LOAD_TO_BUFER 

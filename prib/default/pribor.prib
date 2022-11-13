@@ -8,6 +8,7 @@ S" Load Pribor..." TYPE CR
  CLASS 1_Prib 
 1 FLOATS  DEFS data 
 PriborPassport DEFS  Passport
+CELL DEFS kalibrovka 
 
 : Start
 || D:  str_prib   D: etalon  D: flag  D: pribpath  ||
@@ -25,6 +26,15 @@ PriborPassport DEFS  Passport
 ." adres: "    PriborPassport_info Nameinterface  1+ DUP SWAP C@   TYPE CR
 
 \ etalon @  STRFREE  str_prib @ STRFREE 
+
+ tabl_kalibr NewObj kalibrovka   !
+
+ \ kalibrovka  @  	S" .\prib\default/data.kal"   ERR-INCLUDE-PROBE 
+  " .\prib\default/data.kal"  kalibrovka  @  ^	LoadFile   .
+		IF 	."  kalibrovka:  " kalibrovka   @ ^ SeeDatas 
+		ELSE 0 flag !   THEN  
+flag @
+
   CR
   flag @ DUP . CR
 ;
@@ -35,6 +45,10 @@ PriborPassport DEFS  Passport
 : GetLevel  ." GetLevel=" data F@ FDUP F. 1 ; 
 : Off ." off" ;
  
+ : MinMax  ( float -- float flag )
+	 kalibrovka @ ^ MinMax 
+	\ 1e  -1
+;
 ;CLASS 1_Prib
 S" .....Load Pribor" TYPE CR
 

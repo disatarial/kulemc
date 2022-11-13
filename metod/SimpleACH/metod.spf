@@ -1,8 +1,4 @@
-
-\ REQUIRE  tabl_kalibr  ~disa/kalibr_hype.f
-\ REQUIRE  dBuV->V  ~disa/algoritm.f
-\ REQUIRE WildCMP-U ~pinka/lib/mask.f
-
+ 
 
  
 	0 CONSTANT NoError
@@ -369,30 +365,39 @@ UNTIL
 \	."  ...start  " CR	    
  
 
+ 	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
+	IF "  Минимальное  значение не соответствует генератору. Поправлено. {CRLF} " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN 
+
+	vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
+	IF \ " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
+		"  Максимальное значение не соответствует генератору. Поправлено. " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN
+
  
-\	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! 
-\	vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
-\	 OR  DROP
-\	 IF " частота генератора. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
-\	vFREQ_BEGIN @ F@ vgenerator @ @ ^ MinMax vFREQ_BEGIN @ F! IF " минимальное  значение не соответствует генератору. Поправлено. {CRLF} " vresult @ @  StoFile THEN 
-
-\	vFREQ_END @   F@ vgenerator @ @ ^ MinMax vFREQ_END   @ F!  
-\		IF " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
-\		" максимальное значение не соответствует генератору. поправлено. " vresult @ @  StoFile 
-\		THEN
-			\  IF " максимальное значение не соответствует генератору. Поправлено. {CRLF}"  vresult @ @  StoFile THEN 
-
 	vfile_izmeritel_buf @ DUP 1+ SWAP  C@   INCLUDE-PROBE 	
 	IF " Файл измерителя НЕ подключен " vresult @ @  StoFile  vresult @ @  CRtoFile error_out_file  work-info  ." file izmeritel error "  ERROR_PROG ! -1 THROW 	
 	ELSE     " Файл измерителя подключен " vresult @ @  StoFile  vresult @ @  CRtoFile  ." file izmeritel complite " 
 	THEN
-
-	 NewObj vizmeritel @ !	
+DUP IF 
+	 NewObj 
+ELSE  
+vgenerator @ @
+THEN
+	 vizmeritel @ !	
 	" Запуск  измерителя: " vresult @ @  StoFile  vresult @ @  CRtoFile  
 	 vfile_izmeritel_buf	@  vizmeritel @	@ ^ Start 
 	 IF " Измеритель НЕ обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile  error_out_file  work-info  ERROR_PROG ! -1 THROW 
 	 ELSE   " Измеритель обнаружен " vresult @ @  StoFile  vresult @ @  CRtoFile THEN
 
+ 	vFREQ_BEGIN @ F@ vizmeritel @ @ ^ MinMax vFREQ_BEGIN @ F! 
+	IF "  Минимальное  значение не соответствует генератору. Поправлено. {CRLF} " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN 
+
+	vFREQ_END @   F@ vizmeritel @ @ ^ MinMax vFREQ_END   @ F!  
+	IF \ " частота генератора. Поправлено. {CRLF} "  vresult @ @  StoFile  \ 
+		"  Максимальное значение не соответствует генератору. Поправлено. " vresult @ @  StoFile  vresult @ @  CRtoFile
+	THEN
 
 
 
@@ -479,8 +484,11 @@ UNTIL
 	vgenerator @	@ ^ Stop
  	\ metod-info kalibr_izm	@ ^ Stop
 \ удаление оборудования 	
-	vizmeritel @	@  FreeObj
 	vgenerator @	@  FreeObj
+
+	vizmeritel @ @   vgenerator @	@   =  0=   \ если это не один прибор
+	IF vizmeritel @	@  FreeObj THEN
+
 	\ metod-info kalibr_izm	@  FreeObj
 \ удаление таблиц	
 \	vkalibrovka  @ @   FreeObj
@@ -616,6 +624,7 @@ VARIABLE  button_pause
 VARIABLE  textview_result 
 VARIABLE  textview_result_bufer 
 
+VARIABLE  checkbuttonScrool
 
 	 
 \ диалог ввода цифр и файлов в методы  
@@ -1050,7 +1059,10 @@ CALLBACK: filechooserwidget_save_activated
 	THEN	
 
 	textview_result_bufer @  1 gtk_text_buffer_get_insert -> s
-	0 0 0 0 s textview_result @ 6 gtk_text_view_scroll_to_mark DROP
+	checkbuttonScrool  @  1 gtk_toggle_button_get_active 
+	IF	
+		0 0 0 0 s textview_result @ 6 gtk_text_view_scroll_to_mark DROP
+	THEN	
 	
 	filechooserbutton_file_nastr  @   1 gtk_file_chooser_get_current_folder DUP 
 	0<> 
@@ -1181,6 +1193,7 @@ CALLBACK: but_pause_click
 	 " dialog_entry" >R  R@ STR@  DROP builder_metod  @ 2 gtk_builder_get_object dialog_entry !    R> STRFREE \ 2DROP
 	 " dialog_filechooserbutton"  >R  R@ STR@  DROP builder_metod   @  2 gtk_builder_get_object dialog_filechooserbutton !    R> STRFREE \ 2DROP
 
+	 " checkbuttonScrool" >R  R@ STR@  DROP builder_metod  @ 2 gtk_builder_get_object checkbuttonScrool !    R> STRFREE \ 2DROP 
 
 	 dialog @  1 gtk_widget_hide DROP 
 
