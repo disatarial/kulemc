@@ -73,7 +73,7 @@
               <object class="GtkLabel" id="label9">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="label" translatable="yes">Частота, МГц</property>
+                <property name="label" translatable="yes">Частота, Гц</property>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -477,7 +477,7 @@
             <property name="homogeneous">True</property>
             <child>
               <object class="GtkButton" id="buttonAdd">
-                <property name="label" translatable="yes">Добавить значене</property>
+                <property name="label" translatable="yes">Добавить значение</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>

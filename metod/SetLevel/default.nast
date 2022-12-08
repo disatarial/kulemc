@@ -5,17 +5,17 @@ COMMENT( )
  "  4.0000000e07 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
  "  1.0000000e06 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
  "  0 " S>FLOAT DROP F>D DROP  5 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
- " C:\progs\SPForth\kulemc\metod\SetLevel\1.kal  "   6 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ " C:\kulemc\metod\SetLevel\1.kal "   6 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
  "  0.0000000e00 " S>FLOAT DROP  7 SeeOne  2DROP DROP F!  \ Корректировка калибровки
  "  1.0000000e00 " S>FLOAT DROP  8 SeeOne  2DROP DROP F!  \ Точность калибровки, дБ
  "  1.0000000e01 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Наибольший шаг генератора, дБ
  "  3.0000000e01 " S>FLOAT DROP  10 SeeOne  2DROP DROP F!  \ Наибольший значение генератора, дБ
- " C:\progs\SPForth\kulemc\prib\default\pribor.prib  "   11 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
- " C:\progs\SPForth\kulemc\prib\default\povtor.prib  "   12 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
+ " C:\kulemc\prib\smb100_6g\pribor.prib "   11 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
+ " C:\kulemc\prib\fsv13\pribor.prib "   12 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
  "  5.0000000e06 " S>FLOAT DROP  13 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
  "  -1.8000000e01 " S>FLOAT DROP  14 SeeOne  2DROP DROP F!  \ Текущий уровень генератора
  "  94660284 " S>FLOAT DROP F>D DROP  15 SeeOne  2DROP DROP !  \ Объект генератор
  "  94660284 " S>FLOAT DROP F>D DROP  16 SeeOne  2DROP DROP !  \ Объект генератор
- "  94660212 " S>FLOAT DROP F>D DROP  17 SeeOne  2DROP DROP !  \ Объект калибровка
+ "  86140532 " S>FLOAT DROP F>D DROP  17 SeeOne  2DROP DROP !  \ Объект калибровка
  "  -2.0000000e01 " S>FLOAT DROP  18 SeeOne  2DROP DROP F!  \ Предыдущее значение генератора, дБ
- "  784 " S>FLOAT DROP F>D DROP  19 SeeOne  2DROP DROP !  \ файл результата
+ "  836 " S>FLOAT DROP F>D DROP  19 SeeOne  2DROP DROP !  \ файл результата

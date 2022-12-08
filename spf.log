@@ -1,22 +1,31 @@
-подача сигнала с генератора по значениям калибровочных таблииц 
-в одном месте схемы, и измерение результата  работыв другом.
-Установка и поддержание тебуемого уровня воздействий в заданных границах.
-простая подача сигнала с генератора по значениям калибровочных таблииц 
-без какого-либо контроля.
-Воздействия необходим уровнем с предварительной калибровкой в заданных границах. 
-Сигнал "восстанавливается" по запомненному значению  генератора.
-load grafic file :./metod/SimpleACH/bildo.png 
-button_load_metod_click
-load metod file :./metod/SimpleACH/metod.spf 
-StoFile isn't unique (./metod/SimpleACH/metod.spf)
-FtoFile isn't unique (./metod/SimpleACH/metod.spf)
-DtoFile isn't unique (./metod/SimpleACH/metod.spf)
-CRtoFile isn't unique (./metod/SimpleACH/metod.spf)
-TYPE_BUFER isn't unique (./metod/SimpleACH/metod.spf)
-timer_ticket isn't unique (./metod/SimpleACH/metod.spf)
-load glade file :metod/SimpleACH/metod.glade 
-gtk_file_chooser_set_uri =1 
-but_stop_clickfilechooserbutton_pribor =0 
-filechooserbutton_pribor =0 
 
-Exit 
+INITIALIZATION  tabl_kalibr complite
+filechooserbutton_pribor =1 
+
+end- 54907360 
+DEPTH =54907360  filechooserbutton_pribor_open   gtk_file_chooser_get_filename = 55516552 DEPTH =54907360 
+DEPTH  include =54907360 flag=-1 
+INCLUDE FILE: C:\kulemc\metod\SimpleACH\-10.kal
+file  open 1 num=4 file close 1 
+C:\kulemc\metod\SimpleACH\-10.kal num_datas = 2 numrow = 4 
+file open 2 0  0.0000000e00  1.0000000e02  -1.0000000e01  1.0000000e00 
+1  1.0000000e11  1.0000000e02  -1.0000000e01  1.0000000e00 
+file close 2  kalibrovka:  
+0  0.0000000e00  1.0000000e02  -1.0000000e01  1.0000000e00 
+1  1.0000000e11  1.0000000e02  -1.0000000e01  1.0000000e00 
+degree  -1.0000000e01 
+degree  -1.0000000e01 
+
+end 54907360 
+TreeView_start_metod_click
+DEPTH = filechooserbutton_pribor_open   gtk_file_chooser_get_filename = 55522504 DEPTH =
+DEPTH  include =flag=-1 
+INCLUDE FILE: C:\kulemc\metod\SimpleACH\-10.kal
+file  open 1 num=4 file close 1 
+C:\kulemc\metod\SimpleACH\-10.kal num_datas = 2 numrow = 4 
+file open 2 0  0.0000000e00  1.0000000e02  -1.0000000e01  1.0000000e00 
+1  1.0000000e11  1.0000000e02  -1.0000000e01  1.0000000e00 
+file close 2  kalibrovka:  
+0  0.0000000e00  1.0000000e02  -1.0000000e01  1.0000000e00 
+1  1.0000000e11  1.0000000e02  -1.0000000e01  1.0000000e00 
+degree 

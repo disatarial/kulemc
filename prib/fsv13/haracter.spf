@@ -1,4 +1,4 @@
- " *smb*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " *fsv*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
  " /kulemc\interface\TCPIP.interface" PriborPassport_info interface	LOAD_TO_BUFER 
- " 10.10.10.27" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ " 10.10.10.15" PriborPassport_info interface_data1	LOAD_TO_BUFER 
  " 5025" PriborPassport_info interface_data2	LOAD_TO_BUFER 
