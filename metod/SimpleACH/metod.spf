@@ -90,6 +90,12 @@ CONSTANT sysup-work-info
 : :save_next_sysup-metod-info  { here  } \ следующая переменная в структуре
 DUP here CELL +  ! \  -> here
 ;
+: :save_0_next_sysup-metod-info  { here  } \ следующая переменная в структуре, но её не отображаем при просмотре структуры
+0  \ режим отладки,работы
+IF :save_next_sysup-metod-info  
+ELSE  0 here CELL +  ! \  -> here
+THEN
+;
 
 : Create_sysup-metod-info { \   adr u  here  info }
 HERE  DUP -> here TO sysup-metod-info  
@@ -99,16 +105,17 @@ here S" Частота начальная, Гц"					2 1 FLOATS	Add_sysup-metod-
 here S" Частота конечная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_END		HERE here :save_next_sysup-metod-info -> here
 here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_STEP		HERE here :save_next_sysup-metod-info -> here
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
-here S" Файл калибровки"						4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл калибровки"					4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
-here S" Файл генератора"						5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
-here S" Файл измерителя"						5 256		Add_sysup-metod-info TO  vfile_izmeritel_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл генератора"					5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл измерителя"					5 256		Add_sysup-metod-info TO  vfile_izmeritel_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
-here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_next_sysup-metod-info -> here 
-here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
-here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vizmeritel		HERE here :save_next_sysup-metod-info -> here
-here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
-here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\	HERE here :save_next_sysup-metod-info -> here 
+here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_0_next_sysup-metod-info -> here 
+
+here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_0_next_sysup-metod-info -> here
+here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vizmeritel		HERE here :save_0_next_sysup-metod-info -> here
+here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_0_next_sysup-metod-info -> here 
+here S" файл результата"					1 1 CELLS	Add_sysup-metod-info TO vresult		\	HERE here :save_next_sysup-metod-info -> here 
 ;
 
 

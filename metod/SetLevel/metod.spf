@@ -97,6 +97,12 @@ CONSTANT sysup-work-info
 : :save_next_sysup-metod-info  { here  } \ следующая переменная в структуре
 DUP here CELL +  ! \  -> here
 ;
+: :save_0_next_sysup-metod-info  { here  } \ следующая переменная в структуре, но её не отображаем при просмотре структуры
+0  \ режим отладки,работы
+IF :save_next_sysup-metod-info  
+ELSE  0 here CELL +  ! \  -> here
+THEN
+;
 
 : Create_sysup-metod-info { \   adr u  here  info }
 HERE  DUP -> here TO sysup-metod-info  
@@ -106,19 +112,20 @@ here S" Частота начальная, Гц"					2 1 FLOATS	Add_sysup-metod-
 here S" Частота конечная, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_END		HERE here :save_next_sysup-metod-info -> here
 here S" Шаг по частоте, Гц"					2 1 FLOATS	Add_sysup-metod-info TO  vFREQ_STEP		HERE here :save_next_sysup-metod-info -> here
 here S" ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице"	1 1 CELLS	Add_sysup-metod-info TO  vwork_step		HERE here :save_next_sysup-metod-info -> here
-here S" Файл калибровки"						4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл калибровки"					4 256		Add_sysup-metod-info TO  vfile_kalibrov_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Корректировка калибровки"				2  1 FLOATS	Add_sysup-metod-info TO  vfile_kalibrov_korrect	HERE here :save_next_sysup-metod-info -> here
 here S" Точность калибровки, дБ"				2 1 FLOATS	Add_sysup-metod-info TO  vTochnost		HERE here :save_next_sysup-metod-info -> here 
 here S" Наибольший шаг генератора, дБ"				2 1 FLOATS	Add_sysup-metod-info TO  vGenMaxStep		HERE here :save_next_sysup-metod-info -> here 
 here S" Наибольший значение генератора, дБ"			2 1 FLOATS	Add_sysup-metod-info TO  vGenMax		HERE here :save_next_sysup-metod-info -> here 
-here S" Файл генератора"						5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
-here S" Файл измерителя"						5 256		Add_sysup-metod-info TO  vfile_izmeritel_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл генератора"					5 256		Add_sysup-metod-info TO  vfile_generator_buf	HERE here :save_next_sysup-metod-info -> here
+here S" Файл измерителя"					5 256		Add_sysup-metod-info TO  vfile_izmeritel_buf	HERE here :save_next_sysup-metod-info -> here
 here S" Частота установленная, Гц"				2 1 FLOATS	Add_sysup-metod-info TO  vFREQ			HERE here :save_next_sysup-metod-info -> here
-here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_next_sysup-metod-info -> here 
-here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_next_sysup-metod-info -> here
-here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vizmeritel		HERE here :save_next_sysup-metod-info -> here
-here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_next_sysup-metod-info -> here 
-here S" Предыдущее значение генератора, дБ"			2 1 FLOATS	Add_sysup-metod-info TO  vprev_gen		HERE here :save_next_sysup-metod-info -> here 
+here S" Текущий уровень генератора"				2 1 FLOATS	Add_sysup-metod-info TO  vLevGen		HERE here :save_0_next_sysup-metod-info -> here 
+
+here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vgenerator		HERE here :save_0_next_sysup-metod-info -> here
+here S" Объект генератор"					1 1 CELLS	Add_sysup-metod-info TO  vizmeritel		HERE here :save_0_next_sysup-metod-info -> here
+here S" Объект калибровка"					1 1 CELLS	Add_sysup-metod-info TO  vkalibrovka		HERE here :save_0_next_sysup-metod-info -> here 
+here S" Предыдущее значение генератора, дБ"			2 1 FLOATS	Add_sysup-metod-info TO  vprev_gen		HERE here :save_0_next_sysup-metod-info -> here 
 
 here S" файл результата"						1 1 CELLS	Add_sysup-metod-info TO vresult		\	HERE here :save_next_sysup-metod-info -> here 
 ;
@@ -447,12 +454,14 @@ THEN
 	vFREQ @  F@    vgenerator	@ @ ^ SetFreq  
 	vFREQ @  F@    vizmeritel	@ @ ^ SetFreq  
 
-        vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData \  gen F!  \ начальные данные генератора
+        vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData  \ что будем мерить
 	vTochnost @ F@  2e F* F+ 
+	FDUP vizmeritel @ @ ^ SetLevel		\ устанавливаем предполагаемые уровни на измерителе
 	Data_nach_formula Data_Kalib F!   \ что требуется выставить в результате
 
+
 	 vFREQ @ F@ 2 vkalibrovka @ @ ^ TakeData 
-	vprev_gen @ F@ 6e F-  FMAX  \  выбираем максимальное из предложенного.. < из таблицы или на 20% меньше предыдущего> 
+	vprev_gen @ F@ 6e F-  FMAX  \  выбираем максимальное из предложенного.. < из таблицы или на 50% меньше предыдущего> 
  gen F! 
  	  gen F@  vLevGen @ F!
 
@@ -532,6 +541,7 @@ work_Execute work-info -upravl_thead- @ =
 
  	vresult @ @  CRtoFile  
 
+gen F@ vprev_gen @ F!
 
 \ )
 	."  ...work "

@@ -91,7 +91,7 @@ PriborPassport_info interface_data2   DUP 1 + SWAP C@ STR>S
 STR>S  
   kalibrovka  @  ^	LoadFile   .
 		IF 	."  kalibrovka:  " kalibrovka   @ ^ SeeDatas 
-		ELSE 0 flag !   THEN  
+		ELSE flag @ 0 OR flag !   THEN  
 flag @
 
   CR

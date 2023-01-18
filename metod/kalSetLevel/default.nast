@@ -1,19 +1,20 @@
 COMMENT( )
- "  0 " S>FLOAT DROP F>D DROP  0 SeeOne  2DROP DROP !  \ режим работы 0- испытания 1- калибровка, мс
+ "  0 " S>FLOAT DROP F>D DROP  0 SeeOne  2DROP DROP !  \ режим работы: 0- испытания 1- калибровка
  "  1000 " S>FLOAT DROP F>D DROP  1 SeeOne  2DROP DROP !  \ Пауза между воздействиями, мс
  "  1000 " S>FLOAT DROP F>D DROP  2 SeeOne  2DROP DROP !  \ Время воздействия ,  мс
- "  1.0000000e03 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
- "  3.0000000e03 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
- "  1.0000000e03 " S>FLOAT DROP  5 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
+ "  1.0000000e06 " S>FLOAT DROP  3 SeeOne  2DROP DROP F!  \ Частота начальная, Гц
+ "  3.0000000e06 " S>FLOAT DROP  4 SeeOne  2DROP DROP F!  \ Частота конечная, Гц
+ "  1.0000000e06 " S>FLOAT DROP  5 SeeOne  2DROP DROP F!  \ Шаг по частоте, Гц
  "  0 " S>FLOAT DROP F>D DROP  6 SeeOne  2DROP DROP !  \ ТИП РАБОТЫ: (-1) - %, (0)-линейный, (1)-по таблице
- " C:\progs\SPForth\kulemc\metod\kalSetLevel\1.kal  "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
+ " D:\kulemc\metod\kalSetLevel\1.kal "   7 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл калибровки
  "  0.0000000e00 " S>FLOAT DROP  8 SeeOne  2DROP DROP F!  \ Корректировка калибровки
  "  1.0000000e00 " S>FLOAT DROP  9 SeeOne  2DROP DROP F!  \ Точность калибровки, дБ
  "  6.0000000e00 " S>FLOAT DROP  10 SeeOne  2DROP DROP F!  \ Наибольший шаг генератора, дБ
- " C:\progs\SPForth\kulemc\prib\default\pribor.prib  "   11 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
- " C:\progs\SPForth\kulemc\prib\default\povtor.prib  "   12 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
+ " D:\kulemc\prib\AKIP3418-2\pribor.prib "   11 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл генератора
+ " D:\kulemc\prib\AKIP4131\pribor.prib "   12 SeeOne  2DROP DROP  LOAD_TO_BUFER  \ Файл измерителя
  "  0.0000000e00 " S>FLOAT DROP  13 SeeOne  2DROP DROP F!  \ Частота установленная, Гц
  "  0.0000000e00 " S>FLOAT DROP  14 SeeOne  2DROP DROP F!  \ Текущий уровень генератора
  "  0 " S>FLOAT DROP F>D DROP  15 SeeOne  2DROP DROP !  \ Звук при установке новой частоты, Гц
  "  0 " S>FLOAT DROP F>D DROP  16 SeeOne  2DROP DROP !  \ Звук при при окончании работы, Гц
- 
+ "  0 " S>FLOAT DROP F>D DROP  17 SeeOne  2DROP DROP !  \ Звук при при отсутствии воздействия, Гц
+ "  0 " S>FLOAT DROP F>D DROP  18 SeeOne  2DROP DROP !  \ Зациклить работу: 1 -да, 0 нет

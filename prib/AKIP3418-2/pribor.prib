@@ -2,7 +2,7 @@
 \ REQUIRE  HYPE ~disa\~day\hype3\hype3.f
 \ REQUIRE PriborPassport priborpassport.f
 
-S" Load FSV..." TYPE CR
+S" Load AKIP3418..." TYPE CR
 
 \ vfile_generator_buf @ DUP 1+ SWAP  C@ 
 
@@ -25,7 +25,7 @@ LOOP
 adr n 1 +
 ;
 
- CLASS FSVA
+ CLASS AKIP3418
 1 FLOATS  DEFS data 
 PriborPassport DEFS  Passport
 CELL DEFS kalibrovka 
@@ -55,7 +55,7 @@ CELL DEFS pribor
 
  PriborPassport_info interface	   DUP 1+ SWAP C@   EVALUATE  \ gpib/comport/ethernet/...
  PriborPassport_info Nameinterface  DUP 1+  SWAP C@    EVALUATE   NewObj pribor !
-S" SMB opened.." TYPE CR	
+S" AKIP3418 opened.." TYPE CR	
 
 PriborPassport_info interface_data1   DUP 1 + SWAP C@ STR>S  
 PriborPassport_info interface_data2   DUP 1 + SWAP C@ STR>S
@@ -69,7 +69,7 @@ PriborPassport_info interface_data2   DUP 1 + SWAP C@ STR>S
     pribor @ ^ read   str_prib !     
  str_prib @ STR@ etalon @ STR@ WildCMP-U  
  IF
- 	 "  SMB not found. FIND:  "  >R str_prib @ R@ S+  R> str_prib !
+ 	 "  AKIP3418-2 not found. FIND:  "  >R str_prib @ R@ S+  R> str_prib !
 	  str_prib @  TO_ERROR_PROG_BUFER 
 	  ." error: " TYPE_ERROR_PROG_BUFER
 	      	 -1 flag ! 
@@ -90,6 +90,7 @@ PriborPassport_info interface_data2   DUP 1 + SWAP C@ STR>S
   adr_sum @   len1 @  len2 @ + \ TYPE CR
 STR>S  
   kalibrovka  @  ^	LoadFile   .
+ 
 		IF 	."  kalibrovka:  " kalibrovka   @ ^ SeeDatas 
 		ELSE flag @ 0 OR flag !   THEN  
 flag @
@@ -98,52 +99,42 @@ flag @
   flag @ DUP . CR
 ;
 
-: SetFreq  
-\  pribor   @ ^   write  
- FDUP  >FNUM " FREQ:cent  " DUP >R  STR+   R> S+CRLF pribor @ ^ write 100 PAUSE     
-   >FNUM  " CALC:MARK1:X " DUP >R  STR+  R> S+CRLF pribor @ ^ write  100 PAUSE     
- ; 
+: SetFreq    \ >FNUM  " FREQ " DUP >R  STR+  R>  S+CRLF   
+>FNUM  " C1:BSWV FRQ," DUP >R  STR+  R>  S+CRLF   
+\ DUP STR@ TYPE ."  "
+ pribor   @ ^   write  ; 
 
 \ установить уровень
-: GetLevel    || D: s-adr ||
-300  PAUSE
-BEGIN
-"  calc:mark1:max"  S+CRLF pribor @ ^ write 300  PAUSE
-" calc:mark1:y?"   S+CRLF  pribor @ ^ write 300 PAUSE
-pribor @ ^ read  s-adr !
-s-adr  @ S>FLOAT  
-UNTIL
-1
-; 
-  
-
- \ установить уровень
 : SetLevel    
-." SetLevel  " CR
 \ >FNUM  " LEVEL " DUP >R  STR+ R>  S+CRLF 
-\  DUP STR@ TYPE ."  " 
-\ pribor @ ^ write   
-\  " OUTP:STAT ON" S+CRLF pribor @ ^ write 
-FDROP
-; 
+dBm->V 2e F/
+>FNUM  " C1:BSWV AMP," DUP >R  STR+  R>  S+CRLF   
 
+\  DUP STR@ TYPE ."  " 
+pribor @ ^ write   
+ " C1:OUTP ON" S+CRLF pribor @ ^ write 
+; 
+: AM  ( 1-on, 0- off ) IF " AM: I" ELSE " AM: OF" THEN   S+CRLF  
+\ DUP STR@ TYPE ."  "
+pribor @ ^  write  100 PAUSE ;
+ 
 
 : Stop
-\ " OUTP:STAT OFF" pribor @ ^ write 
-\ 100 PAUSE
+" C1:OUTP OFF" pribor @ ^ write 
+ 100 PAUSE
  pribor @ ^    close \ закрыли после использования
  pribor @ FreeObj
 ;
 
-\ : PULSE  ( 1-on, 0- off ) IF " SOUR:PULM:STAT ON" ELSE " SOUR:PULM:STAT OFF" THEN   S+CRLF  pribor  @ ^  write  100 PAUSE ;
+: PULSE  ( 1-on, 0- off ) IF " SOUR:PULM:STAT ON" ELSE " SOUR:PULM:STAT OFF" THEN   S+CRLF  pribor  @ ^  write  100 PAUSE ;
 
 
-\  : Off 
-\  " OUTP:STAT OFF" S+CRLF  pribor  @ ^ write \; 
-
-\ : On \ " LEVEL on" S+CRLF  pribor  @ ^ write  
-\ " OUTP:STAT ON" S+CRLF pribor  @ ^ write 
-\ ; 
+ : Off 
+  " C1:OUTP OFF" S+CRLF  pribor  @ ^ write \
+; 
+ : On \ " LEVEL on" S+CRLF  pribor  @ ^ write  
+ " C1:OUTP ON" S+CRLF pribor  @ ^ write 
+; 
 
 
 
@@ -153,7 +144,7 @@ FDROP
 	\ 1e  -1
 ;
 
-;CLASS FSVA
+;CLASS AKIP3418
 
-S" .....Load FSVA" TYPE CR
+S" .....Load AKIP3418" TYPE CR
 

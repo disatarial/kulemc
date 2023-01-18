@@ -66,6 +66,7 @@ ELSE 0 -> mlen THEN
   -> n
    n  [CHAR] ; =
    n  [CHAR] , = OR
+   n  [CHAR] : = OR
    n  10 = OR
    n  13 = OR
    n  32 = OR  

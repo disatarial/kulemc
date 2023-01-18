@@ -488,12 +488,13 @@ THEN
 	vFREQ @  F@    vgenerator	@ @ ^ SetFreq  
 	vFREQ @  F@    vizmeritel	@ @ ^ SetFreq  
 
-        vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData \  gen F!  \ начальные данные генератора
+        vFREQ  @ F@ 1 vkalibrovka @ @ ^ TakeData   \ что требуется измерить
 	vTochnost @ F@  2e F* F+ 
+	FDUP vizmeritel @ @ ^ SetLevel		\ устанавливаем предполагаемые уровни на измерителе
 	Data_nach_formula Data_Kalib F!   \ что требуется выставить в результате
 
 	 vFREQ @ F@ 2 vkalibrovka @ @ ^ TakeData 
-	vprev_gen @ F@ 6e F-  FMAX  \  выбираем максимальное из предложенного.. < из таблицы или на 20% меньше предыдущего> 
+	vprev_gen @ F@ 10e F-  FMAX  \  выбираем максимальное из предложенного.. < из таблицы или на 20% меньше предыдущего> 
  gen F! 
  	  gen F@  vLevGen @ F!
 
@@ -571,6 +572,7 @@ work_Execute work-info -upravl_thead- @ =
  	 "    "  vresult @ @  StoFile  
 	TIME&DATE  DROP DROP DROP vresult @ @ DtoFile  vresult @ @ DtoFile  vresult @ @ DtoFile 
 
+gen F@ vprev_gen @ F!
  	vresult @ @  CRtoFile  
 
 
