@@ -1,0 +1,4 @@
+ " *NBM-550*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ " D:\kulemc\interface\COMPORT.interface" PriborPassport_info interface	LOAD_TO_BUFER 
+ " \\.\COM7" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ " 115200" PriborPassport_info interface_data2	LOAD_TO_BUFER 

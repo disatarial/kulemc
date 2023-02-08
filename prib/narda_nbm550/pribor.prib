@@ -1,0 +1,142 @@
+\ настройки прибора
+
+S" Load NBM550..." TYPE CR
+
+
+: Path_end_del \ удаление имени файла из пути  его пути
+{ path \ adr  n  ch -- adr u }
+\ ."  ->in_Path_end_del: " path 1+ path C@  TYPE ."   " 
+0 -> n
+path 1 + -> adr
+path  C@ 0 
+DO \ идем по всем символам строки и ищем "\" или "/"
+	adr I +  C@ -> ch
+\ I . ch . CR
+	ch 92 = 
+	ch 47 = 
+	\ ch CHAR / =
+	\ ch CHAR \  =
+	OR	
+	IF I -> n THEN
+LOOP 
+adr n 1 +
+;
+
+ CLASS NBM550
+1 FLOATS  DEFS data 
+PriborPassport DEFS  Passport
+CELL DEFS kalibrovka 
+CELL DEFS pribor
+
+: Start
+|| D:  str_prib   D: etalon  D: flag  D: pribpath  D: adr1 D: len1 D: adr2 D: len2 D: adr_sum ||
+ pribpath ! \ путь к  файлу прибора, прилетает для команды старт
+  CR "   test pribor pribpath  " STYPE
+   pribpath @ Path_end_del  len1 ! adr1 !   \ TYPE CR
+  S" haracter.spf" len2 ! adr2 !
+  HERE adr_sum !  len1 @ len2  @ + ALLOT
+  adr1 @  adr_sum @ len1 @ CMOVE
+  adr2 @ adr_sum @ len1 @ + len2  @ CMOVE
+  adr_sum @   len1 @  len2 @ + \ TYPE CR
+  
+\  S" ./prib/default/haracter.spf"  
+
+ INCLUDE-PROBE IF ."   ERROR haracteristic pribor not found  " CR -1 flag ! THEN \ считываем характеристики прибора 
+  PriborPassport_info Passport PriborPassport CMOVE \ копируем свежесчитанные данные по прибору 
+  Passport NamePribor 1 +  Passport NamePribor C@  \ название
+  STR>S  etalon !
+
+." interface: "    PriborPassport_info interface  1+ DUP SWAP C@   TYPE CR
+." name: "    PriborPassport_info interface_data1 1+ DUP SWAP C@   TYPE CR
+." adres: "    PriborPassport_info Nameinterface  1+ DUP SWAP C@   TYPE CR
+
+ PriborPassport_info interface	   DUP 1+ SWAP C@   EVALUATE  \ gpib/comport/ethernet/...
+ PriborPassport_info Nameinterface  DUP 1+  SWAP C@    EVALUATE   NewObj pribor !
+S" NBM550 opened.." TYPE CR	
+
+PriborPassport_info interface_data1   DUP 1 + SWAP C@ STR>S  
+PriborPassport_info interface_data2   DUP 1 + SWAP C@ STR>S
+\ CR ." PriborPassport_info interface_data2   " STYPE  ."  " STYPE CR
+ pribor @ ^ open
+\ STYPE ."  " STYPE ."  "
+."  =interface data " 
+
+
+  " DEVICE_INFO?;"  S+CRLF  pribor @ ^  write  
+    pribor @ ^ read   str_prib !     
+ str_prib @ STR@ etalon @ STR@ WildCMP-U  
+ IF
+ 	 "  NBM550 not found. FIND:  "  >R str_prib @ R@ S+  R> str_prib !
+	  str_prib @  TO_ERROR_PROG_BUFER 
+	  ." error: " TYPE_ERROR_PROG_BUFER
+	      	 -1 flag ! 
+ ELSE  
+	str_prib @ STYPE 0 flag ! 
+ THEN
+  etalon   @ STRFREE 
+
+
+
+ tabl_kalibr NewObj kalibrovka   !
+
+  S" data.kal" len2 ! adr2 !
+  HERE adr_sum !  len1 @ len2  @ + ALLOT
+  adr1 @  adr_sum @ len1 @ CMOVE
+  adr2 @ adr_sum @ len1 @ + len2  @ CMOVE
+  \ CR ." adr sum = "      
+  adr_sum @   len1 @  len2 @ + \ TYPE CR
+STR>S  
+  kalibrovka  @  ^	LoadFile   .
+ 
+		IF 	."  kalibrovka:  " kalibrovka   @ ^ SeeDatas 
+		ELSE flag @ 0 OR flag !   THEN  
+flag @
+
+  CR
+  flag @ DUP . CR
+;
+
+: SetFreq 
+FDROP
+; 
+
+\ установить уровень
+: SetLevel    
+FDROP
+; 
+
+\ прочитать уровень
+: GetLevel    || D:   str_prib  ||
+	" REMOTE ON;"  pribor @ ^   write 
+	" MEAS?;"  pribor @ ^   write 
+	300 PAUSE
+	pribor @ ^ read   CR
+\ 	CR  DUP  STR@ TYPE    CR \ STYPE
+	1 N_S_PickUpWord  \ STYPE CR
+\	" REMOTE OFF;"  pribor @ ^   write
+ S>FLOAT DROP 
+\ 10e
+V->dBuV
+1
+; 
+
+ 
+
+: Stop
+\ 100 PAUSE
+ pribor @ ^    close \ закрыли после использования
+ pribor @ FreeObj
+;
+
+
+
+ 
+ : MinMax  ( float -- float flag )
+	 kalibrovka @ ^ MinMax 
+	\ 1e  -1
+;
+
+;CLASS NBM550
+
+S" .....Load NBM550" TYPE CR
+

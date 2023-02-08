@@ -1,0 +1,4 @@
+ " *E8257*" PriborPassport_info NamePribor	LOAD_TO_BUFER 
+ "  \interface\TCPIP.interface" PriborPassport_info interface	LOAD_TO_BUFER 
+ " 10.10.10.20" PriborPassport_info interface_data1	LOAD_TO_BUFER 
+ " 7777" PriborPassport_info interface_data2	LOAD_TO_BUFER 
